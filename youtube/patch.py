@@ -90,6 +90,26 @@ for f in ["leanbackassistant/src/ststable/res/xml/searchable.xml", "leanbackassi
 edit("common/src/main/java/com/liskovsoft/smartyoutubetv2/common/utils/Utils.java",
      '            "org.smarttube.stable",\n', '            "org.smarttube.stable",\n            "%s",\n' % PKG)
 
+# Le fichier de config Google doit connaître le nouvel identifiant (copie de l'entrée du SmartTube stable)
+import copy
+import json
+gs = os.path.join(ST, "smarttubetv/google-services.json")
+with open(gs, encoding="utf-8") as f:
+    g = json.load(f)
+src = [c for c in g["client"] if c["client_info"]["android_client_info"]["package_name"] == "org.smarttube.stable"]
+if not src:
+    sys.exit("PATCH IMPOSSIBLE : google-services.json sans org.smarttube.stable")
+if not any(c["client_info"]["android_client_info"]["package_name"] == PKG for c in g["client"]):
+    c = copy.deepcopy(src[0])
+    c["client_info"]["android_client_info"]["package_name"] = PKG
+    for o in c.get("oauth_client", []):
+        if "android_info" in o:
+            o["android_info"]["package_name"] = PKG
+    g["client"].append(c)
+with open(gs, "w", encoding="utf-8") as f:
+    json.dump(g, f, indent=2)
+print("ok   smarttubetv/google-services.json")
+
 # 5. Pas de proposition de mise à jour vers le SmartTube officiel (les mises à jour arrivent par Dyna)
 edit("common/src/ststable/res/values/update_urls.xml",
      r"<item>[^<]*</item>", "", count=0, regex=True)
