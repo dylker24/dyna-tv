@@ -1,0 +1,23 @@
+# Fichiers de Dyna TV mis à jour automatiquement sur la box (sans réinstaller)
+enq/fayolle/antoine.jpg
+enq/fayolle/arme.jpg
+enq/fayolle/biblio.jpg
+enq/fayolle/brassac.jpg
+enq/fayolle/cabinet.jpg
+enq/fayolle/chateau.jpg
+enq/fayolle/clemence.jpg
+enq/fayolle/edouard.jpg
+enq/fayolle/helene.jpg
+enq/fayolle/nadia.jpg
+enq/fayolle/orangerie.jpg
+enq/fayolle/pied.jpg
+enq/fayolle/plan-chateau.svg
+enq/fayolle/plan-domaine.svg
+enq/fayolle/raymond.jpg
+enq/fayolle/terrasse.jpg
+enquete-fayolle.js
+enquetes-data.js
+enquetes.html
+index.html
+musique.html
+photo.jpg

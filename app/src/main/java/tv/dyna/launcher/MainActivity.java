@@ -97,9 +97,27 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    private long lastSync = 0;
+    private void syncWeb() {
+        long now = System.currentTimeMillis();
+        if (now - lastSync < 10 * 60 * 1000) return;
+        lastSync = now;
+        WebFiles.sync(this, new WebFiles.Done() {
+            @Override
+            public void changed(final boolean indexChanged) {
+                if (!indexChanged) return;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() { if (web != null) web.reload(); }
+                });
+            }
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        syncWeb();
         hideBars();
         web.requestFocus();
         js("window.dynaRefresh&&dynaRefresh()");
@@ -149,12 +167,12 @@ public class MainActivity extends Activity {
             }
             if (path.equals("/photo.jpg")) {
                 File f = new File(getFilesDir(), "photo.jpg");
-                InputStream in = f.exists() ? new FileInputStream(f) : getAssets().open("photo.jpg");
+                InputStream in = f.exists() ? new FileInputStream(f) : WebFiles.open(this, "photo.jpg");
                 return new WebResourceResponse("image/jpeg", null, in);
             }
             String name = path.length() <= 1 ? "index.html" : path.substring(1);
             if (name.contains("..")) return notFound();
-            return new WebResourceResponse(mime(name), name.endsWith(".html") || name.endsWith(".js") || name.endsWith(".css") ? "utf-8" : null, getAssets().open(name));
+            return new WebResourceResponse(mime(name), name.endsWith(".html") || name.endsWith(".js") || name.endsWith(".css") ? "utf-8" : null, WebFiles.open(this, name));
         } catch (Exception e) {
             return notFound();
         }

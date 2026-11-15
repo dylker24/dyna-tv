@@ -75,7 +75,7 @@ public class WebActivity extends Activity {
                 try {
                     String name = p.substring(LOCAL.length());
                     String mime = name.endsWith(".woff2") ? "font/woff2" : name.endsWith(".png") ? "image/png" : name.endsWith(".jpg") ? "image/jpeg" : name.endsWith(".svg") ? "image/svg+xml" : name.endsWith(".js") ? "application/javascript" : "application/octet-stream";
-                    return new WebResourceResponse(mime, null, getAssets().open(name));
+                    return new WebResourceResponse(mime, null, WebFiles.open(WebActivity.this, name));
                 } catch (Exception e) {
                     return null;
                 }
@@ -110,7 +110,7 @@ public class WebActivity extends Activity {
     }
 
     private String readAsset(String name) throws Exception {
-        InputStream in = getAssets().open(name);
+        InputStream in = WebFiles.open(this, name);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buf = new byte[8192];
         int n;
