@@ -2,6 +2,9 @@ name: Dyna TV
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "youtube/**"
+      - ".github/workflows/youtube.yml"
   workflow_dispatch:
 permissions:
   contents: write

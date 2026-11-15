@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dyna : habillage vert et beige de SmartTube (ajouté par youtube/patch.py) -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="dyna_bg">#0E1512</color>
+    <color name="dyna_panel">#151F1A</color>
+    <color name="dyna_card">#1F2D25</color>
+    <color name="dyna_line">#26352D</color>
+    <color name="dyna_beige">#EFE8DA</color>
+    <color name="dyna_green">#9CCB8F</color>
+    <color name="dyna_green_soft">#5E8257</color>
+
+    <style name="App.Theme.Dyna.Player" parent="App.Theme.Leanback.Player">
+        <item name="android:windowBackground">@color/dyna_bg</item>
+        <item name="playbackProgressPrimaryColor">@color/dyna_green</item>
+        <item name="playbackProgressSecondaryColor">@color/dyna_green_soft</item>
+        <item name="playbackControlsIconHighlightColor">@color/dyna_green</item>
+        <item name="cardProgressStyle">@style/ProgressBarHorizontal.Dyna</item>
+        <item name="shelfBackground">@color/dyna_bg</item>
+        <item name="cardDefaultBackground">@color/dyna_card</item>
+        <item name="cardSelectedBackground">@color/dyna_beige</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/dyna_green</item>
+    </style>
+    <style name="App.Theme.Dyna.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/dyna_bg</item>
+        <item name="brandColor">@color/dyna_panel</item>
+        <item name="brandAccentColor">@color/dyna_green</item>
+        <item name="cardProgressStyle">@style/ProgressBarHorizontal.Dyna</item>
+        <item name="shelfBackground">@color/dyna_bg</item>
+        <item name="cardDefaultBackground">@color/dyna_card</item>
+        <item name="cardSelectedBackground">@color/dyna_beige</item>
+        <item name="appLogo">@mipmap/app_logo</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/dyna_green</item>
+    </style>
+    <style name="App.Theme.Dyna.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/dyna_panel</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/dyna_green</item>
+    </style>
+    <style name="ProgressBarHorizontal.Dyna" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_bar_dyna</item>
+    </style>
+</resources>

@@ -1,0 +1,57 @@
+name: Dyna YouTube
+on:
+  push:
+    branches: [main]
+    paths:
+      - "youtube/**"
+      - ".github/workflows/youtube.yml"
+  schedule:
+    - cron: "17 4 * * 1"   # chaque lundi : on récupère les derniers correctifs de SmartTube
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: youtube
+  cancel-in-progress: true
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Récupération de SmartTube
+        run: |
+          git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/yuliskov/SmartTube st
+          git -C st log -1 --format='SmartTube %h du %cd'
+      - name: Habillage Dyna
+        run: python3 youtube/patch.py st
+      - name: Fabrication de l'APK
+        run: |
+          set -eo pipefail
+          exec > >(tee build.log) 2>&1
+          export JAVA_HOME="${JAVA_HOME_17_X64:-$JAVA_HOME}"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          printf 'storeFile=%s\nstorePassword=dynatv2026\nkeyAlias=dyna\nkeyPassword=dynatv2026\n' "$GITHUB_WORKSPACE/dyna.keystore" > st/keystore.properties
+          echo "sdk.dir=$ANDROID_HOME" > st/local.properties
+          cd st
+          chmod +x gradlew
+          ./gradlew :smarttubetv:assembleStstableRelease --no-daemon --stacktrace -x lint
+          f=$(ls smarttubetv/build/outputs/apk/ststable/release/*universal*.apk | head -1)
+          cp "$f" "$GITHUB_WORKSPACE/dyna-youtube.apk"
+          ls -la "$GITHUB_WORKSPACE/dyna-youtube.apk"
+      - name: Publication (lien fixe)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view youtube --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create youtube --repo "$GITHUB_REPOSITORY" --title "Dyna YouTube" --notes "SmartTube à la sauce Dyna." --latest=false
+          gh release upload youtube dyna-youtube.apk --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit youtube --repo "$GITHUB_REPOSITORY" --notes "Dyna YouTube — version ${{ github.run_number }} ($(date -u +%d/%m/%Y)), basée sur $(git -C st log -1 --format='SmartTube %h')." --latest=false
+      - name: Rapport d'erreur
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          touch build.log
+          { echo '```'; grep -E "error:|ERROR|FAILURE|What went wrong|PATCH IMPOSSIBLE" -A4 build.log | head -80; echo; tail -n 60 build.log; echo '```'; } > report.md
+          gh issue create --repo ${{ github.repository }} --title "Erreur fabrication Dyna YouTube ${{ github.run_number }}" --body-file report.md
