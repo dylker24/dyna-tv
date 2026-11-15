@@ -36,7 +36,12 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > st/local.properties
           cd st
           chmod +x gradlew
-          ./gradlew :smarttubetv:assembleStstableRelease --no-daemon --stacktrace -x lint
+          # Maven Central coupe parfois : on retente jusqu'à 3 fois
+          for t in 1 2 3; do
+            ./gradlew :smarttubetv:assembleStstableRelease --no-daemon --stacktrace -x lint && ok=1 && break
+            echo "Essai $t raté, nouvelle tentative dans 30 s"; sleep 30
+          done
+          [ "$ok" = 1 ]
           f=$(ls smarttubetv/build/outputs/apk/ststable/release/*universal*.apk | head -1)
           cp "$f" "$GITHUB_WORKSPACE/dyna-youtube.apk"
           ls -la "$GITHUB_WORKSPACE/dyna-youtube.apk"
