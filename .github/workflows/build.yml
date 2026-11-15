@@ -1,0 +1,43 @@
+name: Dyna TV
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: build
+  cancel-in-progress: true
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fabrication de l'APK Dyna TV
+        run: |
+          set -eo pipefail
+          exec > >(tee build.log) 2>&1
+          export JAVA_HOME="${JAVA_HOME_17_X64:-$JAVA_HOME}"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          for u in https://services.gradle.org/distributions/gradle-8.7-bin.zip https://downloads.gradle.org/distributions/gradle-8.7-bin.zip; do curl -fsSL --retry 4 --retry-delay 5 -o gradle.zip "$u" && unzip -tq gradle.zip >/dev/null && break; rm -f gradle.zip; done
+          unzip -q gradle.zip -d "$RUNNER_TEMP"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          "$RUNNER_TEMP/gradle-8.7/bin/gradle" assembleRelease --no-daemon --stacktrace
+          cp app/build/outputs/apk/release/app-release.apk dyna-tv.apk
+          ls -la dyna-tv.apk
+      - name: Publication (lien fixe)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view tv --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create tv --repo "$GITHUB_REPOSITORY" --title "Dyna TV" --notes "Dyna TV, l'écran d'accueil maison pour Google TV."
+          gh release upload tv dyna-tv.apk --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit tv --repo "$GITHUB_REPOSITORY" --notes "Dyna TV — version ${{ github.run_number }} ($(date -u +%d/%m/%Y))."
+      - name: Rapport d'erreur
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          touch build.log
+          { echo '```'; grep -E "error:|ERROR|FAILURE|What went wrong" -A3 build.log | head -80; echo; tail -n 80 build.log; echo '```'; } > report.md
+          gh issue create --repo ${{ github.repository }} --title "Erreur fabrication Dyna TV ${{ github.run_number }}" --body-file report.md
