@@ -74,7 +74,7 @@ public class WebActivity extends Activity {
                 if (p == null || !p.startsWith(LOCAL) || p.contains("..")) return null;
                 try {
                     String name = p.substring(LOCAL.length());
-                    String mime = name.endsWith(".woff2") ? "font/woff2" : name.endsWith(".png") ? "image/png" : "application/octet-stream";
+                    String mime = name.endsWith(".woff2") ? "font/woff2" : name.endsWith(".png") ? "image/png" : name.endsWith(".jpg") ? "image/jpeg" : name.endsWith(".svg") ? "image/svg+xml" : name.endsWith(".js") ? "application/javascript" : "application/octet-stream";
                     return new WebResourceResponse(mime, null, getAssets().open(name));
                 } catch (Exception e) {
                     return null;

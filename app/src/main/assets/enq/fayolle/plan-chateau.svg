@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="Inter, sans-serif">
+  <rect width="1600" height="900" fill="#0E1512"/>
+  <text x="80" y="60" fill="#E3CFA4" font-size="22" font-weight="700" letter-spacing="4">PLAN DU CHÂTEAU · REZ-DE-CHAUSSÉE ET 1ER ÉTAGE</text>
+
+  <g stroke="#C9A97A" stroke-width="4" fill="#1F2D25">
+    <!-- Rez-de-chaussée -->
+    <rect x="200" y="130" width="980" height="340"/>
+  </g>
+  <text x="200" y="118" fill="#9CCB8F" font-size="20" font-weight="700">REZ-DE-CHAUSSÉE</text>
+  <!-- Tour -->
+  <circle cx="200" cy="130" r="80" fill="#2E2A22" stroke="#E59A86" stroke-width="5"/>
+  <text x="200" y="122" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">TOUR</text>
+  <text x="200" y="146" fill="#BDBFAE" font-size="16" text-anchor="middle">112 marches</text>
+  <text x="200" y="166" fill="#BDBFAE" font-size="16" text-anchor="middle">→ terrasse</text>
+
+  <!-- pièces RDC -->
+  <g stroke="#3D5145" stroke-width="3" fill="none">
+    <path d="M500 130 V470 M820 130 V470 M820 300 H1180 M500 330 H820"/>
+  </g>
+  <text x="380" y="300" fill="#EFE8DA" font-size="28" font-weight="700" text-anchor="middle">BIBLIOTHÈQUE</text>
+  <text x="380" y="336" fill="#BDBFAE" font-size="17" text-anchor="middle">cheminée · socle du cerf</text>
+  <text x="380" y="360" fill="#BDBFAE" font-size="17" text-anchor="middle">cognac 21 h – 22 h 20</text>
+  <text x="660" y="230" fill="#EFE8DA" font-size="28" font-weight="700" text-anchor="middle">GRAND SALON</text>
+  <text x="660" y="264" fill="#BDBFAE" font-size="17" text-anchor="middle">dîner 20 h – 21 h</text>
+  <text x="660" y="410" fill="#EFE8DA" font-size="24" font-weight="700" text-anchor="middle">HALL</text>
+  <text x="1000" y="220" fill="#EFE8DA" font-size="26" font-weight="700" text-anchor="middle">RÉCEPTION</text>
+  <text x="1000" y="254" fill="#BDBFAE" font-size="17" text-anchor="middle">Nadia · registre du portail</text>
+  <text x="1000" y="380" fill="#EFE8DA" font-size="26" font-weight="700" text-anchor="middle">BUREAU</text>
+  <text x="1000" y="414" fill="#BDBFAE" font-size="17" text-anchor="middle">de Clémence · classeurs</text>
+  <!-- passages -->
+  <rect x="270" y="196" width="40" height="10" fill="#E3CFA4"/>
+  <text x="300" y="186" fill="#E3CFA4" font-size="15">passage bibliothèque → tour</text>
+  <rect x="640" y="462" width="40" height="16" fill="#E3CFA4"/>
+  <text x="660" y="500" fill="#E3CFA4" font-size="15" text-anchor="middle">entrée principale</text>
+
+  <!-- 1er étage -->
+  <text x="200" y="578" fill="#9CCB8F" font-size="20" font-weight="700">1ER ÉTAGE · AILE DES CHAMBRES</text>
+  <rect x="200" y="590" width="980" height="220" fill="#1F2D25" stroke="#C9A97A" stroke-width="4"/>
+  <g stroke="#3D5145" stroke-width="3"><path d="M200 690 H1180 M440 590 V690 M680 590 V690 M920 590 V690"/></g>
+  <text x="690" y="752" fill="#BDBFAE" font-size="20" text-anchor="middle">couloir</text>
+  <text x="320" y="645" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">Édouard</text>
+  <text x="560" y="645" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">Hélène</text>
+  <text x="800" y="645" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">Antoine</text>
+  <text x="1050" y="645" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">Clémence</text>
+
+  <!-- légende -->
+  <g transform="translate(1260 160)">
+    <rect width="270" height="250" rx="16" fill="#151F1A" stroke="#26352D"/>
+    <text x="24" y="44" fill="#E3CFA4" font-size="18" font-weight="700">LÉGENDE</text>
+    <rect x="24" y="70" width="34" height="10" fill="#E3CFA4"/><text x="72" y="80" fill="#BDBFAE" font-size="16">porte / passage</text>
+    <circle cx="41" cy="120" r="14" fill="#2E2A22" stroke="#E59A86" stroke-width="3"/><text x="72" y="126" fill="#BDBFAE" font-size="16">la tour</text>
+    <rect x="24" y="152" width="34" height="24" fill="#1F2D25" stroke="#C9A97A" stroke-width="2"/><text x="72" y="170" fill="#BDBFAE" font-size="16">murs du château</text>
+    <text x="24" y="216" fill="#BDBFAE" font-size="15">La tour a aussi sa propre</text>
+    <text x="24" y="236" fill="#BDBFAE" font-size="15">porte, côté parc.</text>
+  </g>
+</svg>

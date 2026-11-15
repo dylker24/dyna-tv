@@ -15,6 +15,28 @@ window.DYNA_ENQUETES.unshift({
   place: 'Vallée de la Vézère',
   tagline: 'Le châtelain est retrouvé au pied de sa tour, la nuit où il a annoncé déshériter tout le monde. Une enquête en trois actes.',
   duration: 'Environ 2 h',
+  cover: 'enq/fayolle/chateau.jpg',
+  victim: { name: 'Édouard de Fayolle', role: 'La victime · 67 ans · châtelain', photo: 'enq/fayolle/edouard.jpg' },
+  plans: [
+    { title: 'Le domaine', src: 'enq/fayolle/plan-domaine.svg' },
+    { title: 'Le château', src: 'enq/fayolle/plan-chateau.svg' }
+  ],
+  timeline: [
+    { t: 'Samedi 20 h 30', text: 'Au dîner, Édouard annonce la vente du château et son nouveau testament.', needs: ['testament'] },
+    { t: '21 h – 22 h 20', text: 'Cognac d\'Édouard et du notaire dans la bibliothèque. La statuette est encore sur son socle à 21 h.', needs: ['statuette'] },
+    { t: '22 h 15 – 23 h 30', text: 'Clémence fait les comptes avec Nadia à la réception.', needs: ['alibiclem'] },
+    { t: '22 h 52 – 23 h 47', text: 'Hélène au téléphone avec sa sœur à Lyon.', needs: ['appels'] },
+    { t: '23 h 08 – 23 h 38', text: 'Une voiture inconnue entre puis ressort par le portail.', needs: ['portail'] },
+    { t: '23 h 10 – 23 h 36', text: 'Antoine au portail avec l\'homme de la voiture inconnue.', needs: ['cameraport'] },
+    { t: '23 h 18', text: 'Édouard lance un mémo vocal sur la tour : il accuse Julien d\'avoir volé la famille.', needs: ['enregistrement'] },
+    { t: '23 h 20', text: 'Raymond voit une silhouette en veste claire sur la terrasse de la tour.', needs: ['silhouette'] },
+    { t: '23 h 22', text: 'La montre d\'Édouard se brise : heure de la mort.', needs: ['montre'] },
+    { t: '23 h 51', text: 'La voiture de Julien Brassac sort par le portail.', needs: ['portail'] },
+    { t: 'Dimanche 6 h 50', text: 'Raymond découvre le corps au pied de la tour.', needs: ['corps'] },
+    { t: 'Dimanche 15 h 25', text: 'Brassac revient au château « pour des papiers ». Il repart à 16 h 05.', needs: ['retour'] },
+    { t: 'Dimanche 15 h 30 – 16 h', text: 'Raymond est tué dans l\'orangerie. Son carnet disparaît.', needs: ['raymond'] },
+    { t: 'Dimanche 22 h', text: 'Brassac réserve un aller simple pour Lisbonne.', needs: ['vol'] }
+  ],
 
   call: [
     { who: 'Gendarmerie', text: 'Dylan, Léna, c\'est le commandant Roussel, brigade de recherches de Périgueux. Je n\'ai personne de libre et j\'ai besoin de vous, tout de suite.' },
@@ -47,7 +69,7 @@ window.DYNA_ENQUETES.unshift({
     raymond:     { name: 'La mort de Raymond', icon: 'pin', text: 'Raymond a été frappé à la tête dans l\'orangerie, dimanche entre 15 h 30 et 16 h. Rien n\'a été volé, sauf une chose : son carnet n\'est plus dans sa poche.' },
     mocassins:   { name: 'Les empreintes de l\'orangerie', icon: 'foot', text: 'Dans la terre de l\'orangerie, des empreintes de chaussures de ville à semelle lisse, taille 42. Pas des bottes, pas des baskets.' },
     carnet:      { name: 'La page du carnet', icon: 'paper', text: 'En passant un crayon sur la page de dessous, l\'écriture de Raymond réapparaît : « Tour, 23 h 20, veste claire. Le notaire ? Le dire aux gendarmes demain. »' },
-    arme:        { name: 'La statuette dans l\'étang', icon: 'box', text: 'Le cerf en bronze de la bibliothèque, repêché dans l\'étang. Ses bois ont exactement la forme de la blessure d\'Édouard. On l\'a essuyé avant de le jeter.' },
+    arme:        { name: 'La statuette dans l\'étang', icon: 'box', photo: 'enq/fayolle/arme.jpg', text: 'Le cerf en bronze de la bibliothèque, repêché dans l\'étang. Ses bois ont exactement la forme de la blessure d\'Édouard. On l\'a essuyé avant de le jeter.' },
     cameraport:  { name: 'La caméra du portail', icon: 'camera', text: 'La caméra du portail montre Antoine dehors, de 23 h 10 à 23 h 36, en train de parler avec un homme sorti de la voiture inconnue. Il lui tend une enveloppe.' },
     appels:      { name: 'Les appels d\'Hélène', icon: 'phone', text: 'Relevé de l\'opérateur : Hélène a appelé sa sœur, à Lyon, de 22 h 52 à 23 h 47. Le somnifère, elle ne l\'a pris qu\'après.' },
     comptes:     { name: 'Les comptes du fonds familial', icon: 'paper', text: 'Dans les classeurs du bureau de Clémence : le fonds de la famille, géré par Julien Brassac depuis quinze ans. Il manque 1,2 million d\'euros, par petits virements vers une société au Portugal.' },
@@ -59,24 +81,24 @@ window.DYNA_ENQUETES.unshift({
   },
 
   locations: [
-    { id: 'pied', act: 1, name: 'Le pied de la tour', text: 'Des graviers, une bâche blanche, et la tour nord qui monte dans le brouillard. Le corps n\'a pas encore été emporté.',
+    { id: 'pied', photo: 'enq/fayolle/pied.jpg', act: 1, name: 'Le pied de la tour', text: 'Des graviers, une bâche blanche, et la tour nord qui monte dans le brouillard. Le corps n\'a pas encore été emporté.',
       spots: [
         { id: 'f1', name: 'Le corps', text: 'Vous soulevez la bâche. Édouard est sur le dos, les yeux ouverts. Il a la tête abîmée, et une main crispée sur rien.', clue: 'corps' },
         { id: 'f2', name: 'Le poignet', text: 'Une belle montre ancienne. Le verre est en miettes, les aiguilles ne bougent plus.', clue: 'montre' },
         { id: 'f3', name: 'Les graviers autour', text: 'Des traces de pas partout : les gendarmes, Raymond, la famille. Impossible d\'en tirer quoi que ce soit.' }
       ] },
-    { id: 'tour', act: 1, name: 'La terrasse de la tour', text: 'Cent douze marches en colimaçon. En haut, une petite terrasse ronde avec un parapet à hauteur de taille. La vue sur la Vézère est vertigineuse.',
+    { id: 'tour', photo: 'enq/fayolle/terrasse.jpg', act: 1, name: 'La terrasse de la tour', text: 'Cent douze marches en colimaçon. En haut, une petite terrasse ronde avec un parapet à hauteur de taille. La vue sur la Vézère est vertigineuse.',
       spots: [
         { id: 'w1', name: 'Le parapet', text: 'Trop haut pour basculer par accident. Il faut se pencher beaucoup… ou être poussé. Quelque chose est accroché à une aspérité de la pierre.', clue: 'tissu' },
         { id: 'w2', name: 'Le sol de la terrasse', text: 'Une petite tache sombre, à peine visible, que quelqu\'un a essayé d\'essuyer. Du sang, peut-être.' },
         { id: 'w3', name: 'L\'escalier', text: 'Une lampe torche éteinte, posée sur une marche. Celle d\'Édouard, d\'après Clémence. Pas d\'empreintes exploitables.' }
       ] },
-    { id: 'biblio', act: 1, name: 'La bibliothèque', text: 'Des boiseries, des milliers de livres, l\'odeur du cigare. C\'est ici qu\'Édouard et le notaire ont pris le digestif après le dîner.',
+    { id: 'biblio', photo: 'enq/fayolle/biblio.jpg', act: 1, name: 'La bibliothèque', text: 'Des boiseries, des milliers de livres, l\'odeur du cigare. C\'est ici qu\'Édouard et le notaire ont pris le digestif après le dîner.',
       spots: [
         { id: 'b1', name: 'La cheminée', text: 'Un socle en marbre, avec une petite plaque : « Le Cerf, bronze, 1882 ». Il n\'y a plus rien dessus.', clue: 'statuette' },
         { id: 'b2', name: 'Les verres', text: 'Deux verres de cognac, deux mégots de cigare. Édouard et Brassac sont restés ici de 21 h à 22 h 20, d\'après le maître d\'hôtel.' }
       ] },
-    { id: 'salon', act: 1, name: 'Le grand salon', text: 'La table du dîner n\'a pas été débarrassée. Des bougies fondues, des verres à moitié pleins, une chaise renversée.',
+    { id: 'salon', photo: 'enq/fayolle/chateau.jpg', act: 1, name: 'Le grand salon', text: 'La table du dîner n\'a pas été débarrassée. Des bougies fondues, des verres à moitié pleins, une chaise renversée.',
       spots: [
         { id: 's1', name: 'Le téléphone de Clémence', text: 'Clémence vous montre les photos qu\'elle a prises pendant le dîner, avant l\'annonce. Tout le monde sourit encore.', clue: 'photos' },
         { id: 's2', name: 'La chaise renversée', text: '« C\'est Antoine, après l\'annonce de papa, explique Clémence. Il est sorti en hurlant. »' }
@@ -91,7 +113,7 @@ window.DYNA_ENQUETES.unshift({
       spots: [
         { id: 'r1', name: 'L\'ordinateur du portail', text: 'Nadia vous ouvre le registre des entrées et sorties de la nuit.', clue: 'portail' }
       ] },
-    { id: 'orangerie', act: 2, name: 'L\'orangerie', text: 'Une serre en verre et en fer forgé, pleine de citronniers en pots. Le corps de Raymond est encore là, sous un drap.',
+    { id: 'orangerie', photo: 'enq/fayolle/orangerie.jpg', act: 2, name: 'L\'orangerie', text: 'Une serre en verre et en fer forgé, pleine de citronniers en pots. Le corps de Raymond est encore là, sous un drap.',
       spots: [
         { id: 'o1', name: 'Le corps de Raymond', text: 'Frappé à la tempe, par derrière. Sa pipe est tombée à côté de lui. Ses poches ont été fouillées.', clue: 'raymond' },
         { id: 'o2', name: 'La terre des allées', text: 'Fraîchement arrosée. Des empreintes nettes y sont restées.', clue: 'mocassins' },
@@ -116,7 +138,7 @@ window.DYNA_ENQUETES.unshift({
         { id: 'g1', name: 'La page de dimanche', text: 'Une seule visite cet après-midi, notée de la main de Nadia.', clue: 'retour' },
         { id: 'g2', name: 'Les images du portail', text: 'Nadia retrouve la vidéo de samedi soir, de 23 h à minuit.', clue: 'cameraport' }
       ] },
-    { id: 'cabinet', act: 3, name: 'Le cabinet de Maître Brassac, Sarlat', text: 'Une belle façade en pierre blonde, place de la Liberté. Derrière la porte, le bruit d\'une broyeuse à papier qui ne s\'arrête pas.',
+    { id: 'cabinet', photo: 'enq/fayolle/cabinet.jpg', act: 3, name: 'Le cabinet de Maître Brassac, Sarlat', text: 'Une belle façade en pierre blonde, place de la Liberté. Derrière la porte, le bruit d\'une broyeuse à papier qui ne s\'arrête pas.',
       spots: [
         { id: 'x1', name: 'Entrer', clue: 'vol',
           choice: { q: 'La broyeuse tourne. Le commandant a son mandat dans une heure. Que faites-vous ?', options: [
@@ -135,7 +157,7 @@ window.DYNA_ENQUETES.unshift({
   ],
 
   suspects: [
-    { id: 'clemence', act: 1, name: 'Clémence de Fayolle', role: 'La fille, directrice de l\'hôtel', age: 34, color: '#8FB08A',
+    { id: 'clemence', photo: 'enq/fayolle/clemence.jpg', act: 1, name: 'Clémence de Fayolle', role: 'La fille, directrice de l\'hôtel', age: 34, color: '#8FB08A',
       intro: 'C\'est elle qui fait tourner le château-hôtel depuis cinq ans. Elle y a mis toute sa vie.',
       questions: [
         { id: 'cl1', q: 'Que s\'est-il passé au dîner ?', a: 'Papa a fait tinter son verre et il a tout lâché : la vente du château à un groupe hôtelier, et un nouveau testament lundi pour une fondation. Tout ce que j\'ai construit ici… vendu. Antoine a renversé sa chaise. Hélène est devenue blanche.', clue: 'testament' },
@@ -143,7 +165,7 @@ window.DYNA_ENQUETES.unshift({
         { id: 'cl3', q: 'Qui pouvait en vouloir à votre père ?', a: 'Ce soir-là ? Tout le monde. Mais tuer… Antoine est un idiot, pas un assassin. Et Julien, le notaire, était comme un frère pour papa. Il est resté tard pour le calmer, je crois.' },
         { id: 'cl4', q: 'Qui gérait l\'argent de la famille ?', act: 2, a: 'Julien Brassac, depuis toujours. Papa lui faisait une confiance aveugle. Mes classeurs sont dans le bureau, prenez tout ce que vous voulez.' }
       ] },
-    { id: 'antoine', act: 1, name: 'Antoine de Fayolle', role: 'Le fils', age: 39, color: '#9FA8C9',
+    { id: 'antoine', photo: 'enq/fayolle/antoine.jpg', act: 1, name: 'Antoine de Fayolle', role: 'Le fils', age: 39, color: '#9FA8C9',
       intro: 'Beau parleur, costume froissé, les yeux cernés. Il vit à Bordeaux et ne venait plus beaucoup au château.',
       questions: [
         { id: 'an1', q: 'Où étiez-vous à 23 h 20 ?', a: 'Dans ma chambre. J\'étais furieux, je suis monté directement après le dîner. Je n\'ai pas bougé de la nuit.' },
@@ -151,14 +173,14 @@ window.DYNA_ENQUETES.unshift({
         { id: 'an3', q: 'Une voiture inconnue est entrée à 23 h 08. Qui était-ce ?', needs: ['portail'], a: '… D\'accord. Je n\'étais pas dans ma chambre. Un type est venu chercher un acompte. Je l\'ai retrouvé au portail, je lui ai donné tout ce que j\'avais. Mais je n\'ai jamais approché la tour, je vous le jure.' },
         { id: 'an4', q: 'La caméra vous montre au portail de 23 h 10 à 23 h 36.', act: 2, needs: ['cameraport'], a: 'Voilà. Vous voyez. J\'étais en train de me faire menacer par un usurier pendant qu\'on tuait mon père. Je ne sais pas si c\'est mieux ou pire.' }
       ] },
-    { id: 'helene', act: 1, name: 'Hélène de Fayolle', role: 'La seconde épouse', age: 61, color: '#C98E8E',
+    { id: 'helene', photo: 'enq/fayolle/helene.jpg', act: 1, name: 'Hélène de Fayolle', role: 'La seconde épouse', age: 61, color: '#C98E8E',
       intro: 'Mariée à Édouard depuis douze ans, avec un contrat de mariage qui ne lui laisse presque rien. Châle rouge, voix douce.',
       questions: [
         { id: 'he1', q: 'Où étiez-vous cette nuit ?', a: 'Dans ma chambre. J\'ai pris un somnifère à 22 h 30, je n\'ai rien entendu avant ce matin.' },
         { id: 'he2', q: 'Le nouveau testament vous touchait aussi ?', a: 'Avec mon contrat de mariage, je n\'avais déjà presque rien. Alors non, l\'argent ne m\'empêchait pas de dormir. C\'est Édouard qui me manque, pas sa fortune.' },
         { id: 'he3', q: 'Votre lit n\'a presque pas servi. Vous avez vraiment dormi ?', needs: ['somniferes'], a: 'Non. J\'ai menti. J\'ai appelé ma sœur à Lyon, longtemps. Je lui ai dit que j\'allais quitter Édouard. Je ne voulais pas qu\'on le sache. Vérifiez mon téléphone si vous voulez.', clue: 'appels' }
       ] },
-    { id: 'brassac', act: 1, name: 'Maître Julien Brassac', role: 'Le notaire de la famille', age: 58, color: '#D6B35C',
+    { id: 'brassac', photo: 'enq/fayolle/brassac.jpg', act: 1, name: 'Maître Julien Brassac', role: 'Le notaire de la famille', age: 58, color: '#D6B35C',
       intro: 'Notaire à Sarlat, ami d\'Édouard depuis trente ans. Il est revenu dès 9 h ce matin « pour aider la famille ». Très calme, très serviable.',
       questions: [
         { id: 'jb1', q: 'Quand avez-vous quitté le château samedi ?', a: 'Vers 22 h 30, après un cognac avec Édouard dans la bibliothèque. Il était bouleversé, mais lucide. J\'étais chez moi à Sarlat avant 23 h.' },
@@ -168,14 +190,14 @@ window.DYNA_ENQUETES.unshift({
         { id: 'jb5', q: 'Il manque 1,2 million d\'euros dans le fonds que vous gérez.', act: 2, needs: ['comptes'], a: 'Des placements. Complexes. Je ne m\'attends pas à ce que des amateurs comprennent. Je ne répondrai plus qu\'en présence de mon avocat.' },
         { id: 'jb6', q: 'Le mémo vocal d\'Édouard. C\'est votre voix.', act: 3, needs: ['enregistrement'], a: '… Il allait tout détruire. Ma réputation, mon étude, trente ans de travail. Je voulais juste lui parler. La statuette était dans ma main avant que je comprenne ce que je faisais.' }
       ] },
-    { id: 'raymond', act: 1, deadAct: 2, name: 'Raymond Lacoste', role: 'Le jardinier', age: 72, color: '#B7A99A',
+    { id: 'raymond', photo: 'enq/fayolle/raymond.jpg', act: 1, deadAct: 2, name: 'Raymond Lacoste', role: 'Le jardinier', age: 72, color: '#B7A99A',
       intro: 'Cinquante ans au service des Fayolle. Il a trouvé le corps à 6 h 50, en allant ouvrir la serre.',
       questions: [
         { id: 'ra1', q: 'Comment avez-vous trouvé Monsieur ?', a: 'J\'allais à l\'orangerie, comme tous les matins. Il était là, dans les graviers. J\'ai tout de suite su qu\'il n\'y avait plus rien à faire.' },
         { id: 'ra2', q: 'Avez-vous remarqué quelque chose cette nuit ?', a: 'Je fumais ma pipe sous le cèdre, vers 23 h 20. Il y avait de la lumière tout en haut de la tour. Une silhouette, avec une veste claire. Je me suis dit que c\'était Monsieur qui prenait l\'air. Je l\'ai noté dans mon carnet, je note tout.', clue: 'silhouette' },
         { id: 'ra3', q: 'Monsieur avait-il des soucis ces derniers temps ?', a: 'Il parlait souvent tout seul dans le parc, avec son téléphone. Il enregistrait des notes, des idées. Vendredi, il m\'a dit : « Raymond, il y a un loup dans la bergerie. » Je n\'ai pas compris.' }
       ] },
-    { id: 'nadia', act: 1, name: 'Nadia Benali', role: 'La réceptionniste de nuit', age: 27, color: '#A3B7E0',
+    { id: 'nadia', photo: 'enq/fayolle/nadia.jpg', act: 1, name: 'Nadia Benali', role: 'La réceptionniste de nuit', age: 27, color: '#A3B7E0',
       intro: 'Elle était de garde toute la nuit à la réception. Elle n\'a pas dormi, et ça se voit.',
       questions: [
         { id: 'na1', q: 'Clémence était avec vous cette nuit ?', a: 'Oui, de 22 h 15 à 23 h 30, on a fait les comptes ensemble. Elle pleurait un peu. Elle n\'a pas quitté la réception.', clue: 'alibiclem' },

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="Inter, sans-serif">
+  <defs>
+    <pattern id="grass" width="22" height="22" patternUnits="userSpaceOnUse">
+      <rect width="22" height="22" fill="#18241D"/>
+      <path d="M4 18l2-5 2 5M14 9l2-5 2 5" stroke="#22322A" stroke-width="1.5" fill="none"/>
+    </pattern>
+    <pattern id="gravel" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#4A4A40"/>
+      <circle cx="3" cy="3" r="1" fill="#5C5B4F"/><circle cx="8" cy="7" r="1" fill="#3E3E35"/>
+    </pattern>
+    <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#E3CFA4"/></marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#0E1512"/>
+  <!-- Parc -->
+  <path d="M60 60 H1260 V840 H60 Z" fill="url(#grass)" stroke="#3D5145" stroke-width="3"/>
+  <!-- Rivière -->
+  <path d="M1290 0 C1250 200 1350 330 1300 470 C1260 600 1330 760 1300 900 L1600 900 L1600 0 Z" fill="#14303A"/>
+  <path d="M1310 0 C1275 200 1370 330 1322 470 C1282 600 1350 760 1322 900" stroke="#2C5563" stroke-width="3" fill="none" stroke-dasharray="14 10"/>
+  <text x="1450" y="450" fill="#5F8FA0" font-size="30" font-weight="600" text-anchor="middle" transform="rotate(-80 1450 450)" letter-spacing="8">LA VÉZÈRE</text>
+
+  <!-- Allée et cour -->
+  <path d="M640 840 L640 610" stroke="url(#gravel)" stroke-width="60"/>
+  <rect x="470" y="440" width="380" height="180" fill="url(#gravel)" stroke="#5C5B4F" stroke-width="2"/>
+  <text x="660" y="540" fill="#C9C2B0" font-size="22" text-anchor="middle" opacity=".8">Cour d'honneur</text>
+
+  <!-- Château -->
+  <rect x="420" y="230" width="520" height="210" fill="#2E2A22" stroke="#C9A97A" stroke-width="4"/>
+  <text x="680" y="330" fill="#EFE8DA" font-size="34" font-weight="700" text-anchor="middle">CHÂTEAU</text>
+  <text x="680" y="368" fill="#BDBFAE" font-size="20" text-anchor="middle">salon · bibliothèque · réception · chambres</text>
+  <!-- Tour nord -->
+  <circle cx="420" cy="230" r="62" fill="#3A332A" stroke="#E59A86" stroke-width="5"/>
+  <text x="420" y="224" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">TOUR</text>
+  <text x="420" y="248" fill="#EFE8DA" font-size="20" font-weight="700" text-anchor="middle">NORD</text>
+  <!-- Corps -->
+  <g transform="translate(330 150)">
+    <circle r="22" fill="#E59A86"/>
+    <path d="M-9 -9L9 9M9 -9L-9 9" stroke="#0E1512" stroke-width="4"/>
+  </g>
+  <text x="245" y="120" fill="#E59A86" font-size="20" font-weight="600">Édouard retrouvé ici</text>
+  <!-- Porte de la tour côté parc -->
+  <rect x="352" y="268" width="26" height="12" fill="#E3CFA4"/>
+  <text x="250" y="320" fill="#E3CFA4" font-size="17">porte de la tour</text>
+  <text x="250" y="342" fill="#E3CFA4" font-size="17">(côté parc)</text>
+
+  <!-- Cèdre de Raymond -->
+  <circle cx="200" cy="470" r="70" fill="#1F3A2A" stroke="#2E5A3E" stroke-width="3"/>
+  <circle cx="200" cy="470" r="38" fill="#24452F"/>
+  <text x="200" y="476" fill="#9CCB8F" font-size="20" font-weight="600" text-anchor="middle">Le cèdre</text>
+  <path d="M245 430 L360 290" stroke="#E3CFA4" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arr)"/>
+  <text x="105" y="572" fill="#BDBFAE" font-size="17">Raymond fumait ici, 23 h 20 :</text>
+  <text x="105" y="594" fill="#BDBFAE" font-size="17">il voit la terrasse de la tour</text>
+
+  <!-- Orangerie -->
+  <rect x="990" y="250" width="200" height="130" rx="8" fill="#1F2D25" stroke="#7FCFB5" stroke-width="3"/>
+  <path d="M990 290 H1190 M1040 250 V380 M1090 250 V380 M1140 250 V380" stroke="#2E4A3E" stroke-width="2"/>
+  <text x="1090" y="330" fill="#EFE8DA" font-size="24" font-weight="700" text-anchor="middle">ORANGERIE</text>
+  <text x="1090" y="410" fill="#BDBFAE" font-size="17" text-anchor="middle">cabane de Raymond au fond</text>
+
+  <!-- Étang -->
+  <ellipse cx="1050" cy="650" rx="160" ry="95" fill="#14303A" stroke="#2C5563" stroke-width="3"/>
+  <text x="1050" y="656" fill="#8FB7C6" font-size="24" font-weight="700" text-anchor="middle">ÉTANG</text>
+  <circle cx="900" cy="590" r="20" fill="#24452F"/><circle cx="1200" cy="720" r="22" fill="#24452F"/>
+  <text x="1050" y="780" fill="#BDBFAE" font-size="17" text-anchor="middle">saules · eau profonde</text>
+
+  <!-- Portail -->
+  <rect x="580" y="830" width="120" height="16" fill="#E3CFA4"/>
+  <text x="640" y="880" fill="#E3CFA4" font-size="22" font-weight="700" text-anchor="middle">PORTAIL (badges + caméra)</text>
+  <!-- Parking -->
+  <rect x="120" y="700" width="260" height="110" fill="url(#gravel)" stroke="#5C5B4F" stroke-width="2"/>
+  <text x="250" y="762" fill="#EFE8DA" font-size="22" font-weight="600" text-anchor="middle">Parking des invités</text>
+  <path d="M380 760 L610 790" stroke="#5C5B4F" stroke-width="22"/>
+
+  <!-- Boussole -->
+  <g transform="translate(1180 110)">
+    <circle r="40" fill="#151F1A" stroke="#3D5145" stroke-width="2"/>
+    <path d="M0 -30 L10 0 L0 30 L-10 0 Z" fill="#EFE8DA"/><path d="M0 -30 L10 0 L-10 0 Z" fill="#E59A86"/>
+    <text y="-46" fill="#EFE8DA" font-size="18" font-weight="700" text-anchor="middle">N</text>
+  </g>
+  <text x="80" y="40" fill="#E3CFA4" font-size="22" font-weight="700" letter-spacing="4">PLAN DU DOMAINE DE FAYOLLE</text>
+</svg>
