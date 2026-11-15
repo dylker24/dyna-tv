@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Dyna TV</string>
-    <string name="watcher_name">Dyna TV : bouton Accueil</string>
-    <string name="watcher_desc">Remplace l\'écran d\'accueil Google TV par Dyna TV : au démarrage et quand on appuie sur le bouton Accueil, c\'est Dyna TV qui s\'affiche. Ne lit aucun contenu de l\'écran.</string>
 </resources>
