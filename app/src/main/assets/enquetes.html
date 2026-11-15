@@ -143,6 +143,7 @@ svg{flex:none}
 </div></div>
 
 <script src="/__dyna/enquetes-data.js"></script>
+<script src="/__dyna/enquete-fayolle.js"></script>
 <script>
 (function () {
   'use strict';
@@ -256,6 +257,8 @@ svg{flex:none}
   function hasAll(list) { return (list || []).every(has); }
   function actOf(x) { return x.act || 1; }
   function visible(x) { return actOf(x) <= (st.act || 1); }
+  function ini(n) { return String(n).replace(/^(Dr\.?|Maître|Me)\s+/, '').charAt(0); }
+  function dead(p) { return p.deadAct && p.deadAct <= (st.act || 1); }
   function curAct() { var a = ep.acts || []; for (var i = 0; i < a.length; i++) if (a[i].num === (st.act || 1)) return a[i]; return null; }
   function suspect(id) { for (var i = 0; i < ep.suspects.length; i++) if (ep.suspects[i].id === id) return ep.suspects[i]; return null; }
   function gain(clue) {
@@ -364,10 +367,11 @@ svg{flex:none}
       if (sub) return talkView(sub, answer && answer.p === sub ? answer.a : null);
       var h2 = '<h2 class="g">Les témoins</h2><p class="lead">Interrogez-les. Certaines questions ne s\'ouvrent qu\'avec le bon indice en main.</p><div class="grid g2">';
       ep.suspects.filter(visible).forEach(function (p) {
+        if (dead(p)) { h2 += '<div class="card lock"><div class="pp"><div class="av" style="background:#3D5145;color:#EFE8DA">' + esc(ini(p.name)) + '</div><div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + ' · décédé</div></div></div></div>'; return; }
         var qs = p.questions.filter(visible);
         var n = qs.filter(function (q) { return st.asked.indexOf(q.id) >= 0; }).length;
         var open = qs.filter(function (q) { return st.asked.indexOf(q.id) < 0 && hasAll(q.needs); }).length;
-        h2 += '<div class="card" ' + act(function () { sub = p.id; answer = null; renderHub('#pane [data-f]'); }) + '><div class="pp"><div class="av" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + ', ' + p.age + ' ans</div></div></div>' +
+        h2 += '<div class="card" ' + act(function () { sub = p.id; answer = null; renderHub('#pane [data-f]'); }) + '><div class="pp"><div class="av" style="background:' + p.color + '">' + esc(ini(p.name)) + '</div><div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + ', ' + p.age + ' ans</div></div></div>' +
           '<div class="meta">' + n + ' / ' + qs.length + ' questions posées' + (open ? ' · <span style="color:var(--gold)">' + open + ' à poser</span>' : '') + '</div></div>';
       });
       return h2 + '</div>';
@@ -447,7 +451,7 @@ svg{flex:none}
 
   function talkView(id, answer) {
     var p = suspect(id);
-    var h = '<div class="pp"><div class="av big" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><div><div class="kicker">' + esc(p.role) + '</div><h2 class="g">' + esc(p.name) + '</h2><p class="lead">' + esc(p.intro) + '</p></div></div>';
+    var h = '<div class="pp"><div class="av big" style="background:' + p.color + '">' + esc(ini(p.name)) + '</div><div><div class="kicker">' + esc(p.role) + '</div><h2 class="g">' + esc(p.name) + '</h2><p class="lead">' + esc(p.intro) + '</p></div></div>';
     if (answer) h += '<div class="bubble"><div class="who">' + esc(p.name) + '</div>' + esc(answer) + '</div>';
     h += '<div class="qlist">';
     p.questions.filter(visible).forEach(function (q) {
@@ -542,10 +546,10 @@ svg{flex:none}
     function pick(v) { fin.picks[fin.i] = v; fin.i++; finalStep(); }
     var h = head;
     if (step.type === 'suspect') {
-      var list = ep.suspects.filter(visible);
+      var list = ep.suspects.filter(function (p) { return visible(p) && !dead(p); });
       h += '<div class="grid ' + (list.length + (step.none ? 1 : 0) > 4 ? 'g4' : 'g4') + '" style="max-height:640px;overflow:hidden">';
       list.forEach(function (p) {
-        h += '<div class="card" style="align-items:center;text-align:center;min-height:0;padding:22px" ' + act(function () { pick(p.id); }) + '><div class="av" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><h3 class="g" style="font-size:24px">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + '</div></div>';
+        h += '<div class="card" style="align-items:center;text-align:center;min-height:0;padding:22px" ' + act(function () { pick(p.id); }) + '><div class="av" style="background:' + p.color + '">' + esc(ini(p.name)) + '</div><h3 class="g" style="font-size:24px">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + '</div></div>';
       });
       if (step.none) h += '<div class="card" style="align-items:center;justify-content:center;text-align:center;min-height:0;padding:22px" ' + act(function () { pick(null); }) + '><div class="av" style="background:#3D5145;color:#EFE8DA">–</div><h3 class="g" style="font-size:24px">' + esc(step.none) + '</h3></div>';
       h += '</div>';
