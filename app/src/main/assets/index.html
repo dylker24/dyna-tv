@@ -12,7 +12,7 @@
 @font-face{font-family:"Space Grotesk";font-weight:700;src:url(fonts/space-grotesk-latin-700-normal.woff2) format("woff2")}
 :root{--bg:#0E1512;--card:#151F1A;--card2:#1F2D25;--line:#26352D;--line2:#3D5145;--text:#EFE8DA;--soft:#BDBFAE;--mute:#A9AE9F;--dim:#8F9A8C;--green:#9CCB8F}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;-webkit-user-select:none;user-select:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;position:fixed;inset:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;-webkit-user-select:none;user-select:none}
 .g{font-family:"Space Grotesk",sans-serif}
 #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;padding:52px 96px;display:flex;flex-direction:column;gap:36px;overflow:hidden}
 header{display:flex;justify-content:space-between;align-items:center;height:56px;flex:none}
@@ -80,6 +80,7 @@ h2{margin:0;font-size:26px;font-weight:600}
 </style>
 </head>
 <body>
+<div id="root" style="position:fixed;left:0;top:0;width:100vw;height:100vh;overflow:hidden">
 <div id="stage">
   <header>
     <div class="brand g"><b>DYNA</b><i>TV</i></div>
@@ -120,6 +121,7 @@ h2{margin:0;font-size:26px;font-weight:600}
   </div>
 
   <div id="toast"></div>
+</div>
 </div>
 
 <script>
@@ -214,12 +216,17 @@ h2{margin:0;font-size:26px;font-weight:600}
     var h = '';
     shortItems.forEach(function (s, i) {
       var cls = 'sc' + (s.type === 'add' ? ' add' : '') + (zone === 'short' && idx.short === i ? ' on' : '') + (s.type === 'app' && !s.app ? ' off' : '');
-      var ic = s.app ? '<img alt="" class="' + (s.app.banner ? 'bn' : '') + '" src="icon/' + encodeURIComponent(s.app.pkg) + '">' : svg(s.icon || 'plus');
+      var ic = s.app ? '<img alt="" onerror="this.style.visibility=\'hidden\'" class="' + (s.app.banner ? 'bn' : '') + '" src="icon/' + encodeURIComponent(s.app.pkg) + '">' : svg(s.icon || 'plus');
       h += '<div class="' + cls + '">' + ic + '<span>' + esc(s.name) + '</span></div>';
     });
     $('short').innerHTML = h;
-    var on = $('short').querySelector('.on');
-    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    var box = $('short'), on = box.querySelector('.on');
+    if (on) {
+      var l = on.offsetLeft - box.offsetLeft, r = l + on.offsetWidth;
+      if (l < box.scrollLeft) box.scrollLeft = l - 6;
+      else if (r > box.scrollLeft + box.clientWidth) box.scrollLeft = r - box.clientWidth + 6;
+    } else box.scrollLeft = 0;
+    noScroll();
   }
   function renderHero() {
     var d = MAIN[idx.main];
@@ -258,8 +265,13 @@ h2{margin:0;font-size:26px;font-weight:600}
       }
     });
     $('grid').innerHTML = h;
-    var el = $('grid').querySelector('.on');
-    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+    var g = $('grid'), el = g.querySelector('.on');
+    if (el) {
+      var t = el.offsetTop - g.offsetTop, b = t + el.offsetHeight;
+      if (t < g.scrollTop) g.scrollTop = t - 8;
+      else if (b > g.scrollTop + g.clientHeight) g.scrollTop = b - g.clientHeight + 8;
+    }
+    noScroll();
   }
   function render() {
     renderMain(); buildShort(); renderShort(); renderHero();
@@ -384,10 +396,24 @@ h2{margin:0;font-size:26px;font-weight:600}
   }
 
   // ---------- Démarrage ----------
-  function fit() {
-    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-    $('stage').style.transform = 'scale(' + s + ')';
+  // La page ne doit jamais défiler : seul l'écran 1920×1080 réduit à la taille de la télé est visible
+  function noScroll() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = document.documentElement.scrollLeft = 0;
+    document.body.scrollTop = document.body.scrollLeft = 0;
+    $('root').scrollTop = $('root').scrollLeft = 0;
   }
+  function fit() {
+    var w = (B && B.screenW && B.screenW()) || document.documentElement.clientWidth || window.innerWidth;
+    var h = (B && B.screenH && B.screenH()) || document.documentElement.clientHeight || window.innerHeight;
+    var s = Math.min(w / 1920, h / 1080);
+    $('stage').style.transform = 'scale(' + s + ')';
+    $('stage').style.left = Math.max(0, (w - 1920 * s) / 2) + 'px';
+    $('stage').style.top = Math.max(0, (h - 1080 * s) / 2) + 'px';
+    noScroll();
+  }
+  window.addEventListener('scroll', noScroll);
+  setTimeout(fit, 300); setTimeout(fit, 1200);
   window.addEventListener('resize', fit);
   fit(); tick(); setInterval(tick, 15000);
   loadApps(); render();

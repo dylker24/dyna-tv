@@ -42,10 +42,19 @@ public class WebActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        s.setLoadWithOverviewMode(true);
-        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(false);
+        s.setSupportZoom(false);
+        s.setBuiltInZoomControls(false);
+        s.setTextZoom(100);
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.setWebChromeClient(new WebChromeClient());
+        web.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public int screenW() { return Math.round((web.getWidth() > 0 ? web.getWidth() : getResources().getDisplayMetrics().widthPixels) / getResources().getDisplayMetrics().density); }
+            @android.webkit.JavascriptInterface
+            public int screenH() { return Math.round((web.getHeight() > 0 ? web.getHeight() : getResources().getDisplayMetrics().heightPixels) / getResources().getDisplayMetrics().density); }
+        }, "Dyna");
         web.setWebViewClient(new WebViewClient() {
             // Les polices de Dyna TV, servies depuis l'appli
             @Override

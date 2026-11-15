@@ -57,8 +57,11 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-        s.setLoadWithOverviewMode(true);
-        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(false);
+        s.setSupportZoom(false);
+        s.setBuiltInZoomControls(false);
+        s.setTextZoom(100);
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.setVerticalScrollBarEnabled(false);
         web.setHorizontalScrollBarEnabled(false);
@@ -278,6 +281,13 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
+
+        /** Taille de l'écran en pixels CSS (indépendant des réglages de zoom de la WebView). */
+        @JavascriptInterface
+        public int screenW() { return Math.round(web.getWidth() > 0 ? web.getWidth() / getResources().getDisplayMetrics().density : getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().density); }
+
+        @JavascriptInterface
+        public int screenH() { return Math.round(web.getHeight() > 0 ? web.getHeight() / getResources().getDisplayMetrics().density : getResources().getDisplayMetrics().heightPixels / getResources().getDisplayMetrics().density); }
 
         @JavascriptInterface
         public String version() {
