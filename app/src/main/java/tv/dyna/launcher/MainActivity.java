@@ -208,6 +208,61 @@ public class MainActivity extends Activity {
         }
     }
 
+    // ---------- Mises à jour ----------
+
+    private void download(String url) {
+        java.net.HttpURLConnection c = null;
+        try {
+            File dir = new File(getCacheDir(), "maj");
+            dir.mkdirs();
+            File[] old = dir.listFiles();
+            if (old != null) for (File f : old) f.delete();
+            File out = new File(dir, "maj-" + System.currentTimeMillis() + ".apk");
+            String u = url;
+            for (int hop = 0; hop < 6; hop++) {
+                c = (java.net.HttpURLConnection) new java.net.URL(u).openConnection();
+                c.setInstanceFollowRedirects(false);
+                c.setConnectTimeout(15000);
+                c.setReadTimeout(30000);
+                c.setRequestProperty("User-Agent", "DynaTV");
+                int code = c.getResponseCode();
+                if (code >= 300 && code < 400 && c.getHeaderField("Location") != null) {
+                    u = new java.net.URL(new java.net.URL(u), c.getHeaderField("Location")).toString();
+                    c.disconnect();
+                    continue;
+                }
+                if (code != 200) throw new Exception("HTTP " + code);
+                break;
+            }
+            long total = c.getContentLength();
+            InputStream in = c.getInputStream();
+            java.io.FileOutputStream fo = new java.io.FileOutputStream(out);
+            byte[] buf = new byte[65536];
+            long done = 0;
+            int n, lastPct = -1;
+            while ((n = in.read(buf)) > 0) {
+                fo.write(buf, 0, n);
+                done += n;
+                int pct = total > 0 ? (int) (done * 100 / total) : -1;
+                if (pct != lastPct && (pct % 5 == 0)) { lastPct = pct; js("window.dynaUpdate&&dynaUpdate('dl'," + pct + ")"); }
+            }
+            fo.close();
+            in.close();
+            js("window.dynaUpdate&&dynaUpdate('install',100)");
+            Uri uri = Build.VERSION.SDK_INT >= 24
+                    ? androidx.core.content.FileProvider.getUriForFile(this, "tv.dyna.launcher.files", out)
+                    : Uri.fromFile(out);
+            Intent i = new Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(uri, "application/vnd.android.package-archive")
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } catch (Exception e) {
+            js("window.dynaUpdate&&dynaUpdate('error',0)");
+        } finally {
+            if (c != null) c.disconnect();
+        }
+    }
+
     // ---------- Pont avec la page ----------
 
     private class Bridge {
@@ -288,6 +343,25 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public int screenH() { return Math.round(web.getHeight() > 0 ? web.getHeight() / getResources().getDisplayMetrics().density : getResources().getDisplayMetrics().heightPixels / getResources().getDisplayMetrics().density); }
+
+        /** Télécharge un APK et ouvre l'installation (mise à jour par-dessus). */
+        @JavascriptInterface
+        public void update(final String url, final String label) {
+            if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+                js("window.dynaUpdate&&dynaUpdate('perm',0)");
+                try {
+                    startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                } catch (Exception e) {
+                    try { startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); } catch (Exception ignored) { }
+                }
+                return;
+            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() { download(url); }
+            }).start();
+        }
 
         @JavascriptInterface
         public String version() {
