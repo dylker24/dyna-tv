@@ -177,6 +177,7 @@ svg{flex:none}
     back: '<path d="M15 6l-6 6 6 6"/>',
     play: '<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
     reset: '<path d="M4 12a8 8 0 1 0 2.300-5.600"/><path d="M4 4v4.500h4.500"/>',
+    eye: '<path d="M2 12s3.500-7 10-7 10 7 10 7-3.500 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
     star: '<path d="M12 3l2.700 5.600 6.100.900-4.400 4.300 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.900z"/>'
   };
   function ico(n, s, col) { return '<svg width="' + (s || 30) + '" height="' + (s || 30) + '" viewBox="0 0 24 24" fill="none" stroke="' + (col || 'currentColor') + '" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IC[n] || IC.paper) + '</svg>'; }
@@ -249,10 +250,13 @@ svg{flex:none}
   // ---------- État d'une partie ----------
   var ep = null, st = null;
   function key() { return 'dyna.enq.' + ep.id; }
-  function fresh() { return { started: true, found: [], spots: [], asked: [], reports: [], seen: [], cps: {}, final: null, score: [0, 0] }; }
+  function fresh() { return { started: true, act: 1, found: [], spots: [], asked: [], reports: [], seen: [], cps: {}, final: null, score: [0, 0], fails: 0 }; }
   function save() { lsSet(key(), st); }
   function has(c) { return st.found.indexOf(c) >= 0; }
   function hasAll(list) { return (list || []).every(has); }
+  function actOf(x) { return x.act || 1; }
+  function visible(x) { return actOf(x) <= (st.act || 1); }
+  function curAct() { var a = ep.acts || []; for (var i = 0; i < a.length; i++) if (a[i].num === (st.act || 1)) return a[i]; return null; }
   function suspect(id) { for (var i = 0; i < ep.suspects.length; i++) if (ep.suspects[i].id === id) return ep.suspects[i]; return null; }
   function gain(clue) {
     if (!clue || has(clue)) return false;
@@ -278,7 +282,7 @@ svg{flex:none}
     var h = '';
     EPS.forEach(function (e) {
       var s = lsGet('dyna.enq.' + e.id, null);
-      var state = !s ? 'Nouvelle enquête' : s.final ? 'Résolue' : 'En cours · ' + s.found.length + ' indice' + (s.found.length > 1 ? 's' : '');
+      var state = !s ? 'Nouvelle enquête' + (e.duration ? ' · ' + e.duration : '') : s.final ? 'Résolue' : 'En cours · acte ' + (s.act || 1) + ' · ' + s.found.length + ' indice' + (s.found.length > 1 ? 's' : '');
       h += '<div class="ep" ' + act(function () { openEpisode(e); }) + '><div class="big g">' + e.num + '</div><div class="n">Enquête ' + e.num + ' · ' + esc(e.place) + '</div><h3 class="g">' + esc(e.title) + '</h3><p>' + esc(e.tagline) + '</p><div class="st">' + state + '</div></div>';
     });
     SOON.forEach(function (e) {
@@ -330,7 +334,8 @@ svg{flex:none}
       { id: 'rapports', name: 'Rapports', ic: 'mail', badge: st.reports.length, isNew: newReports() > 0 },
       { id: 'accuser', name: 'Accuser', ic: 'gavel' }
     ];
-    var h = '<div class="head"><div class="kicker">Enquête ' + ep.num + '</div><h2 class="g">' + esc(ep.title) + '</h2></div>';
+    var ca = curAct();
+    var h = '<div class="head"><div class="kicker">Enquête ' + ep.num + (ca ? ' · Acte ' + ca.num : '') + '</div><h2 class="g">' + esc(ep.title) + '</h2>' + (ca ? '<div class="mute" style="font-size:20px;margin-top:6px">' + esc(ca.title) + '</div>' : '') + '</div>';
     items.forEach(function (it) {
       h += '<div class="ni' + (tab === it.id ? ' cur' : '') + '" data-tab="' + it.id + '" ' + act(function () { tab = it.id; sub = null; renderHub('[data-tab="' + it.id + '"]'); }) + '>' + ico(it.ic, 28) + it.name +
         (it.badge ? '<span class="badge' + (it.isNew ? ' new' : '') + '">' + it.badge + '</span>' : '') + '</div>';
@@ -347,20 +352,23 @@ svg{flex:none}
     if (tab === 'lieux') {
       if (sub) return placeView(sub);
       var h = '<h2 class="g">Les lieux</h2><p class="lead">Fouillez chaque endroit. Les indices trouvés vont directement dans votre dossier.</p><div class="grid g3">';
-      ep.locations.forEach(function (l) {
-        var n = l.spots.filter(function (s) { return st.spots.indexOf(s.id) >= 0; }).length;
-        h += '<div class="card" ' + act(function () { sub = l.id; renderHub('#pane [data-f]'); }) + '><div class="ic">' + ico('pin', 32) + '</div><h3 class="g">' + esc(l.name) + '</h3><div class="meta">' + (n === l.spots.length ? '<span class="chk">Fouillé</span>' : n + ' / ' + l.spots.length + ' endroits fouillés') + '</div></div>';
+      ep.locations.filter(visible).forEach(function (l) {
+        var spots = l.spots.filter(visible);
+        var n = spots.filter(function (s) { return st.spots.indexOf(s.id) >= 0; }).length;
+        var fresh = actOf(l) === (st.act || 1) && actOf(l) > 1 && n === 0;
+        h += '<div class="card" ' + act(function () { sub = l.id; renderHub('#pane [data-f]'); }) + '><div class="ic">' + ico('pin', 32) + '</div><h3 class="g">' + esc(l.name) + '</h3><div class="meta">' + (n === spots.length ? '<span class="chk">Fouillé</span>' : (fresh ? '<span style="color:var(--gold)">Nouveau · </span>' : '') + n + ' / ' + spots.length + ' endroits fouillés') + '</div></div>';
       });
       return h + '</div>';
     }
     if (tab === 'temoins') {
       if (sub) return talkView(sub, answer && answer.p === sub ? answer.a : null);
       var h2 = '<h2 class="g">Les témoins</h2><p class="lead">Interrogez-les. Certaines questions ne s\'ouvrent qu\'avec le bon indice en main.</p><div class="grid g2">';
-      ep.suspects.forEach(function (p) {
-        var n = p.questions.filter(function (q) { return st.asked.indexOf(q.id) >= 0; }).length;
-        var open = p.questions.filter(function (q) { return st.asked.indexOf(q.id) < 0 && hasAll(q.needs); }).length;
+      ep.suspects.filter(visible).forEach(function (p) {
+        var qs = p.questions.filter(visible);
+        var n = qs.filter(function (q) { return st.asked.indexOf(q.id) >= 0; }).length;
+        var open = qs.filter(function (q) { return st.asked.indexOf(q.id) < 0 && hasAll(q.needs); }).length;
         h2 += '<div class="card" ' + act(function () { sub = p.id; answer = null; renderHub('#pane [data-f]'); }) + '><div class="pp"><div class="av" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + ', ' + p.age + ' ans</div></div></div>' +
-          '<div class="meta">' + n + ' / ' + p.questions.length + ' questions posées' + (open ? ' · <span style="color:var(--gold)">' + open + ' à poser</span>' : '') + '</div></div>';
+          '<div class="meta">' + n + ' / ' + qs.length + ' questions posées' + (open ? ' · <span style="color:var(--gold)">' + open + ' à poser</span>' : '') + '</div></div>';
       });
       return h2 + '</div>';
     }
@@ -383,6 +391,7 @@ svg{flex:none}
       return h4 + '</div>';
     }
     if (tab === 'accuser') {
+      if ((st.act || 1) < (ep.final.unlockAct || 1)) return '<h2 class="g">L\'accusation</h2><p class="lead">Pas encore. Il vous manque des pièces du puzzle : continuez à fouiller et à interroger. L\'accusation s\'ouvrira au dernier acte.</p>';
       return '<h2 class="g">L\'accusation</h2><p class="lead">Quand vous êtes sûrs de vous, désignez le coupable, expliquez comment il s\'y est pris et montrez la preuve. Vous n\'avez qu\'une seule chance.</p>' +
         '<p class="lead mute">Dossier : ' + st.found.length + ' indice' + (st.found.length > 1 ? 's' : '') + ' sur ' + Object.keys(ep.clues).length + '.</p>' +
         '<div class="row"><div class="btn main" ' + act(startFinal) + '>' + ico('gavel', 28) + 'Accuser quelqu\'un</div></div>';
@@ -393,14 +402,17 @@ svg{flex:none}
   function placeView(id) {
     var l = ep.locations.filter(function (x) { return x.id === id; })[0];
     var h = '<div class="kicker">Lieu</div><h2 class="g">' + esc(l.name) + '</h2><p class="lead">' + esc(l.text) + '</p><div class="qlist">';
-    l.spots.forEach(function (s) {
+    l.spots.filter(visible).forEach(function (s) {
       var done = st.spots.indexOf(s.id) >= 0;
-      h += '<div class="q' + (done ? ' done' : '') + '" ' + act(function () { search(l, s); }) + '>' + ico('pin', 28) + '<span>' + esc(s.name) + '</span>' + (done ? '<span class="tag">Fouillé' + (s.clue ? ' · indice trouvé' : '') + '</span>' : '<span class="tag" style="color:var(--gold)">Fouiller</span>') + '</div>';
+      if (s.needsSpot && st.spots.indexOf(s.needsSpot) < 0) { h += '<div class="q lock">' + ico('lock', 26) + '<span>La suite plus tard…</span></div>'; return; }
+      var verb = s.choice ? 'Agir' : 'Fouiller';
+      h += '<div class="q' + (done ? ' done' : '') + '" ' + act(function () { search(l, s); }) + '>' + ico(s.choice ? 'eye' : 'pin', 28) + '<span>' + esc(s.name) + '</span>' + (done ? '<span class="tag">Fait' + (s.clue ? ' · indice trouvé' : '') + '</span>' : '<span class="tag" style="color:var(--gold)">' + verb + '</span>') + '</div>';
     });
     h += '<div class="q" ' + act(function () { sub = null; renderHub('#pane [data-f]'); }) + '>' + ico('back', 28) + '<span>Retour aux lieux</span></div>';
     return h + '</div>';
   }
   function search(l, s) {
+    if (s.choice && st.spots.indexOf(s.id) < 0) return scene(l, s);
     if (st.spots.indexOf(s.id) < 0) { st.spots.push(s.id); save(); }
     var k = s.clue ? ep.clues[s.clue] : null;
     say(s.text);
@@ -410,12 +422,35 @@ svg{flex:none}
     if (s.clue) gain(s.clue);
   }
 
+  // Scène où vous décidez ensemble quoi faire
+  function scene(l, s) {
+    var c = s.choice, h = '<div class="kicker">' + esc(l.name) + ' · À vous de décider</div><h2 class="g">' + esc(c.q) + '</h2><p class="sub">Mettez-vous d\'accord avant d\'appuyer.</p><div class="opts">';
+    c.options.forEach(function (o, i) {
+      h += '<div class="opt" ' + act(function () {
+        say(o.text);
+        if (o.good) {
+          if (st.spots.indexOf(s.id) < 0) { st.spots.push(s.id); save(); }
+          var k = s.clue ? ep.clues[s.clue] : null;
+          modal('<div class="kicker">' + esc(l.name) + '</div><h2 class="g">Bien joué.</h2><p class="txt">' + esc(o.text) + '</p>' +
+            (k ? '<div class="card" style="flex-direction:row;align-items:center;gap:22px;min-height:0"><div class="ic">' + ico(k.icon, 32) + '</div><div><h3 class="g">Indice : ' + esc(k.name) + '</h3><p>' + esc(k.text) + '</p></div></div>' : '') +
+            '<div class="row"><div class="btn main" ' + act(closeModal) + '>Continuer</div></div>', closeModal);
+          if (s.clue) gain(s.clue);
+        } else {
+          st.fails = (st.fails || 0) + 1; save();
+          modal('<div class="kicker">' + esc(l.name) + '</div><h2 class="g">Mauvaise idée…</h2><p class="txt">' + esc(o.text) + '</p><div class="row"><div class="btn main" ' + act(function () { scene(l, s); }) + '>Réessayer</div><div class="btn" ' + act(closeModal) + '>Plus tard</div></div>', closeModal);
+        }
+      }) + '><span class="k">' + 'ABCD'.charAt(i) + '</span><span>' + esc(o.label) + '</span></div>';
+    });
+    say(c.q);
+    modal(h + '</div>', closeModal);
+  }
+
   function talkView(id, answer) {
     var p = suspect(id);
     var h = '<div class="pp"><div class="av big" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><div><div class="kicker">' + esc(p.role) + '</div><h2 class="g">' + esc(p.name) + '</h2><p class="lead">' + esc(p.intro) + '</p></div></div>';
     if (answer) h += '<div class="bubble"><div class="who">' + esc(p.name) + '</div>' + esc(answer) + '</div>';
     h += '<div class="qlist">';
-    p.questions.forEach(function (q) {
+    p.questions.filter(visible).forEach(function (q) {
       var asked = st.asked.indexOf(q.id) >= 0, open = hasAll(q.needs);
       if (!open) { h += '<div class="q lock">' + ico('lock', 26) + '<span>Il vous manque un indice pour poser cette question.</span></div>'; return; }
       h += '<div class="q' + (asked ? ' done' : '') + '" data-q="' + q.id + '" ' + act(function () { ask(p, q); }) + '>' + ico(asked ? 'paper' : 'people', 26) + '<span>' + esc(q.q) + '</span>' + (asked ? '<span class="tag">Déjà posée</span>' : '') + '</div>';
@@ -435,6 +470,15 @@ svg{flex:none}
   // ---------- Rapports et points d'enquête ----------
   function checkEvents() {
     if (screen !== 'hub' || $('modal').className.indexOf('show') >= 0) return;
+    var acts2 = ep.acts || [];
+    for (var a = 0; a < acts2.length; a++) {
+      var A = acts2[a];
+      if (A.num === (st.act || 1) + 1 && hasAll(A.unlock)) {
+        st.act = A.num; save();
+        say('Acte ' + A.num + '. ' + A.title + '. ' + A.text);
+        return modal('<div class="kicker">Acte ' + A.num + '</div><h2 class="g" style="font-size:84px">' + esc(A.title) + '</h2><p class="txt">' + esc(A.text) + '</p><div class="row"><div class="btn main" ' + act(function () { closeModal(); }) + '>On y va</div></div>', null);
+      }
+    }
     for (var i = 0; i < ep.reports.length; i++) {
       var r = ep.reports[i];
       if (st.reports.indexOf(r.id) < 0 && hasAll(r.needs)) { st.reports.push(r.id); save(); return showReport(r, true); }
@@ -489,37 +533,49 @@ svg{flex:none}
 
   // ---------- Accusation ----------
   var fin = null;
-  function startFinal() {
-    fin = {};
-    var h = '<div class="kicker">Accusation · 1 sur 3</div><h2 class="g">' + esc(ep.final.whoQ) + '</h2><div class="grid g4">';
-    ep.suspects.forEach(function (p) {
-      h += '<div class="card" style="align-items:center;text-align:center" ' + act(function () { fin.who = p.id; finalHow(); }) + '><div class="av big" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + '</div></div>';
-    });
-    modal(h + '</div>', function () { closeModal(); });
+  function startFinal() { fin = { i: 0, picks: [] }; finalStep(); }
+  function finalStep() {
+    var f = ep.final, step = f.steps[fin.i], n = f.steps.length;
+    if (!step) return finalResult();
+    var head = '<div class="kicker">Accusation · ' + (fin.i + 1) + ' sur ' + n + '</div><h2 class="g">' + esc(step.q) + '</h2>';
+    var back = fin.i === 0 ? function () { closeModal(); } : function () { fin.i--; fin.picks.pop(); finalStep(); };
+    function pick(v) { fin.picks[fin.i] = v; fin.i++; finalStep(); }
+    var h = head;
+    if (step.type === 'suspect') {
+      var list = ep.suspects.filter(visible);
+      h += '<div class="grid ' + (list.length + (step.none ? 1 : 0) > 4 ? 'g4' : 'g4') + '" style="max-height:640px;overflow:hidden">';
+      list.forEach(function (p) {
+        h += '<div class="card" style="align-items:center;text-align:center;min-height:0;padding:22px" ' + act(function () { pick(p.id); }) + '><div class="av" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><h3 class="g" style="font-size:24px">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + '</div></div>';
+      });
+      if (step.none) h += '<div class="card" style="align-items:center;justify-content:center;text-align:center;min-height:0;padding:22px" ' + act(function () { pick(null); }) + '><div class="av" style="background:#3D5145;color:#EFE8DA">–</div><h3 class="g" style="font-size:24px">' + esc(step.none) + '</h3></div>';
+      h += '</div>';
+    } else if (step.type === 'option') {
+      h += '<div class="opts">';
+      step.options.forEach(function (o, i) { h += '<div class="opt" ' + act(function () { pick(i); }) + '><span class="k">' + 'ABCD'.charAt(i) + '</span><span>' + esc(o) + '</span></div>'; });
+      h += '</div>';
+    } else {
+      h += '<div class="grid g3">';
+      step.options.filter(has).forEach(function (c) { var k = ep.clues[c]; h += '<div class="card" style="min-height:0" ' + act(function () { pick(c); }) + '><div class="pp"><div class="ic">' + ico(k.icon, 32) + '</div><h3 class="g" style="font-size:24px">' + esc(k.name) + '</h3></div></div>'; });
+      h += '<div class="card" style="min-height:0" ' + act(function () { pick(null); }) + '><div class="pp"><div class="ic">' + ico('paper', 32) + '</div><h3 class="g" style="font-size:24px">Pas de preuve, on fonce</h3></div></div></div>';
+    }
+    say(step.q);
+    modal(h, back);
   }
-  function finalHow() {
-    var f = ep.final, h = '<div class="kicker">Accusation · 2 sur 3</div><h2 class="g">' + esc(f.howQ) + '</h2><div class="opts">';
-    f.how.forEach(function (o, i) { h += '<div class="opt" ' + act(function () { fin.how = i; finalProof(); }) + '><span class="k">' + 'ABCD'.charAt(i) + '</span><span>' + esc(o) + '</span></div>'; });
-    modal(h + '</div>', startFinal);
-  }
-  function finalProof() {
-    var f = ep.final, h = '<div class="kicker">Accusation · 3 sur 3</div><h2 class="g">' + esc(f.proofQ) + '</h2><div class="grid g3">';
-    var list = f.proofs.filter(has);
-    list.forEach(function (c) { var k = ep.clues[c]; h += '<div class="card" ' + act(function () { fin.proof = c; finalResult(); }) + '><div class="pp"><div class="ic">' + ico(k.icon, 32) + '</div><h3 class="g">' + esc(k.name) + '</h3></div></div>'; });
-    h += '<div class="card" ' + act(function () { fin.proof = null; finalResult(); }) + '><div class="pp"><div class="ic">' + ico('paper', 32) + '</div><h3 class="g">Pas de preuve, on fonce</h3></div></div>';
-    modal(h + '</div>', finalHow);
+  function stepOk(step, v) {
+    if (step.type === 'clue') return (step.answers || []).indexOf(v) >= 0;
+    return v === step.answer;
   }
   function finalResult() {
     var f = ep.final;
-    var r = { who: fin.who === f.culprit, how: fin.how === f.howAnswer, proof: f.proofAnswers.indexOf(fin.proof) >= 0, picked: fin };
-    st.final = r; save();
-    if (!r.who) {
-      var p = suspect(fin.who);
+    var res = f.steps.map(function (step, i) { return stepOk(step, fin.picks[i]); });
+    st.final = { res: res, picks: fin.picks.slice() }; save();
+    if (!res[0]) {
+      var p = suspect(fin.picks[0]);
       say(f.wrong);
-      return modal('<div class="kicker">Verdict</div><h2 class="g">' + esc(p.name) + ' n\'y est pour rien.</h2><p class="txt">' + esc(f.wrong) + '</p><div class="row"><div class="btn main" ' + act(showResults) + '>Voir le bilan</div></div>', null);
+      return modal('<div class="kicker">Verdict</div><h2 class="g">' + esc(p ? p.name : 'Cette personne') + ' n\'y est pour rien.</h2><p class="txt">' + esc(f.wrong) + '</p><div class="row"><div class="btn main" ' + act(showResults) + '>Voir le bilan</div></div>', null);
     }
     say(f.confession);
-    modal('<div class="kicker">Verdict · c\'était bien ' + esc(suspect(f.culprit).name) + '</div><h2 class="g">Les aveux</h2><p class="txt">' + esc(f.confession) + '</p><div class="row"><div class="btn main" ' + act(finalFate) + '>Décider de son sort</div></div>', null);
+    modal('<div class="kicker">Verdict · c\'était bien ' + esc(suspect(f.steps[0].answer).name) + '</div><h2 class="g">Les aveux</h2><p class="txt">' + esc(f.confession) + '</p><div class="row"><div class="btn main" ' + act(finalFate) + '>Décider de son sort</div></div>', null);
   }
   function finalFate() {
     var f = ep.final, h = '<div class="kicker">À vous de décider</div><h2 class="g">' + esc(f.fateQ) + '</h2><div class="opts">';
@@ -529,14 +585,14 @@ svg{flex:none}
   }
   function showResults() {
     show('hub'); renderHub();
-    var r = st.final, f = ep.final;
-    var pts = (r.who ? 1 : 0) + (r.how ? 1 : 0) + (r.proof ? 1 : 0);
-    var title = pts === 3 ? 'Enquête parfaite !' : pts === 2 ? 'Belle enquête !' : r.who ? 'Coupable trouvé, de justesse.' : 'L\'affaire vous a échappé.';
+    var r = st.final, f = ep.final, res = r.res || [], n = f.steps.length;
+    var pts = res.filter(Boolean).length;
+    var title = pts === n ? 'Enquête parfaite !' : pts >= n - 1 && res[0] ? 'Belle enquête !' : res[0] ? 'Coupable trouvé, mais il manque des morceaux.' : 'L\'affaire vous a échappé.';
     var h = '<div class="kicker">Bilan · ' + esc(ep.title) + '</div><h2 class="g">' + title + '</h2><div class="res">' +
-      '<div class="card"><div class="meta">Accusation</div><div class="num g">' + pts + '/3</div><p>' + (r.who ? 'Bon coupable' : 'Mauvais coupable') + ' · ' + (r.how ? 'bon scénario' : 'scénario faux') + ' · ' + (r.proof ? 'bonne preuve' : 'preuve faible') + '</p></div>' +
+      '<div class="card"><div class="meta">Accusation</div><div class="num g">' + pts + '/' + n + '</div><p>' + f.steps.map(function (s, i) { return (res[i] ? '✓ ' : '✗ ') + s.label; }).join(' · ') + '</p></div>' +
       '<div class="card"><div class="meta">Flair de ' + PLAYERS[0] + '</div><div class="num g">' + st.score[0] + '/' + ep.checkpoints.length + '</div><p>Points d\'enquête réussis</p></div>' +
       '<div class="card"><div class="meta">Flair de ' + PLAYERS[1] + '</div><div class="num g">' + st.score[1] + '/' + ep.checkpoints.length + '</div><p>Points d\'enquête réussis</p></div></div>' +
-      '<p class="sub">Indices trouvés : ' + st.found.length + ' sur ' + Object.keys(ep.clues).length + '. ' + (st.score[0] === st.score[1] ? 'Égalité au flair !' : 'Meilleur flair : ' + PLAYERS[st.score[0] > st.score[1] ? 0 : 1] + '.') + '</p>' +
+      '<p class="sub">Indices trouvés : ' + st.found.length + ' sur ' + Object.keys(ep.clues).length + '. Faux pas sur le terrain : ' + (st.fails || 0) + '. ' + (st.score[0] === st.score[1] ? 'Égalité au flair !' : 'Meilleur flair : ' + PLAYERS[st.score[0] > st.score[1] ? 0 : 1] + '.') + '</p>' +
       '<div class="row"><div class="btn main" ' + act(function () { closeModal(); renderMenu(); }) + '>Retour aux enquêtes</div><div class="btn" ' + act(function () { st = fresh(); save(); closeModal(); startCall(); }) + '>' + ico('reset', 26) + 'Rejouer</div></div>';
     say(title);
     modal(h, function () { closeModal(); renderMenu(); });
