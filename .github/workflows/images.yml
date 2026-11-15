@@ -1,0 +1,25 @@
+name: Images des enquêtes
+on:
+  push:
+    branches: [main]
+    paths: ["images/sources.txt"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Téléchargement
+        run: |
+          mkdir -p images/raw
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            code=$(curl -sL -o "images/raw/$name" -w '%{http_code}' "$url")
+            echo "$name $code $(wc -c < images/raw/$name) $(file -b images/raw/$name | cut -c1-60)"
+          done < images/sources.txt
+      - name: Enregistrement
+        run: |
+          git config user.name "Dyna"; git config user.email "dyna@users.noreply.github.com"
+          git add images/raw && git commit -m "Images des enquêtes" && git push || true
