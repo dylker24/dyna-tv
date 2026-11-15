@@ -307,7 +307,7 @@ h2{margin:0;font-size:26px;font-weight:600}
       if (d.web) {
         var u = get(d.web, '');
         if (!u) return openAsk();
-        if (B) B.openUrl(u); else toast('Ouverture de ' + u);
+        if (B) B.openPage(u, 'musique.html'); else toast('Ouverture de ' + u);
         return;
       }
       return launch(d.app, d.name);

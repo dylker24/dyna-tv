@@ -2,16 +2,28 @@ package tv.dyna.launcher;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-/** Ouvre une appli web (Dynamusique…) en plein écran. Retour = page précédente, puis fermeture. */
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+/** Ouvre une appli web en plein écran.
+ *  - avec "url" seule : la page du serveur telle quelle ;
+ *  - avec "url" + "asset" : une page de Dyna TV (ex. musique.html, la version télé de Dynamusique)
+ *    chargée comme si elle venait du serveur, pour qu'elle puisse lui parler directement.
+ *  Retour : la page décide (window.dynaBack), sinon page précédente, sinon fermeture. */
 public class WebActivity extends Activity {
+    private static final String LOCAL = "/__dyna/";
     private WebView web;
 
     @Override
@@ -19,7 +31,7 @@ public class WebActivity extends Activity {
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         web = new WebView(this);
-        web.setBackgroundColor(Color.BLACK);
+        web.setBackgroundColor(Color.rgb(14, 21, 18));
         setContentView(web);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
@@ -32,19 +44,69 @@ public class WebActivity extends Activity {
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setLoadWithOverviewMode(true);
         s.setUseWideViewPort(true);
-        web.setWebViewClient(new WebViewClient());
+        web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.setWebChromeClient(new WebChromeClient());
+        web.setWebViewClient(new WebViewClient() {
+            // Les polices de Dyna TV, servies depuis l'appli
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri u = request.getUrl();
+                String p = u.getPath();
+                if (p == null || !p.startsWith(LOCAL) || p.contains("..")) return null;
+                try {
+                    String name = p.substring(LOCAL.length());
+                    String mime = name.endsWith(".woff2") ? "font/woff2" : name.endsWith(".png") ? "image/png" : "application/octet-stream";
+                    return new WebResourceResponse(mime, null, getAssets().open(name));
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        });
 
         String url = getIntent().getStringExtra("url");
+        String asset = getIntent().getStringExtra("asset");
         if (url == null || url.length() == 0) { finish(); return; }
-        web.loadUrl(url);
+        if (asset != null && asset.length() > 0) {
+            try {
+                Uri u = Uri.parse(url);
+                String base = u.getScheme() + "://" + u.getEncodedAuthority() + "/";
+                web.loadDataWithBaseURL(base, readAsset(asset), "text/html", "utf-8", base);
+            } catch (Exception e) {
+                web.loadUrl(url);
+            }
+        } else {
+            web.loadUrl(url);
+        }
         web.requestFocus();
+    }
+
+    private String readAsset(String name) throws Exception {
+        InputStream in = getAssets().open(name);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+        in.close();
+        return out.toString("UTF-8");
     }
 
     @Override
     public void onBackPressed() {
-        if (web != null && web.canGoBack()) web.goBack();
-        else finish();
+        if (web == null) { finish(); return; }
+        web.evaluateJavascript("(function(){try{return !!(window.dynaBack&&window.dynaBack())}catch(e){return false}})()", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String handled) {
+                if ("true".equals(handled)) return;
+                if (web != null && web.canGoBack() && getIntent().getStringExtra("asset") == null) web.goBack();
+                else finish();
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (web != null) { web.onResume(); web.requestFocus(); }
     }
 
     @Override

@@ -268,6 +268,17 @@ public class MainActivity extends Activity {
             }
         }
 
+        /** Ouvre une page de Dyna TV (ex. musique.html) branchée sur un serveur de la maison. */
+        @JavascriptInterface
+        public boolean openPage(String url, String asset) {
+            try {
+                startActivity(new Intent(MainActivity.this, WebActivity.class).putExtra("url", url).putExtra("asset", asset));
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
         @JavascriptInterface
         public String version() {
             try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception e) { return ""; }
