@@ -25,6 +25,8 @@ import java.io.InputStream;
 public class WebActivity extends Activity {
     private static final String LOCAL = "/__dyna/";
     private WebView web;
+    private android.speech.tts.TextToSpeech tts;
+    private boolean ttsReady = false;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -52,6 +54,14 @@ public class WebActivity extends Activity {
         web.addJavascriptInterface(new Object() {
             @android.webkit.JavascriptInterface
             public int screenW() { return Math.round((web.getWidth() > 0 ? web.getWidth() : getResources().getDisplayMetrics().widthPixels) / getResources().getDisplayMetrics().density); }
+            /** Lit un texte à voix haute (voix française de la box). */
+            @android.webkit.JavascriptInterface
+            public void speak(String text) {
+                if (tts == null || !ttsReady || text == null) return;
+                tts.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "dyna");
+            }
+            @android.webkit.JavascriptInterface
+            public void stopSpeak() { if (tts != null) tts.stop(); }
             @android.webkit.JavascriptInterface
             public int screenH() { return Math.round((web.getHeight() > 0 ? web.getHeight() : getResources().getDisplayMetrics().heightPixels) / getResources().getDisplayMetrics().density); }
         }, "Dyna");
@@ -72,6 +82,16 @@ public class WebActivity extends Activity {
             }
         });
 
+        tts = new android.speech.tts.TextToSpeech(this, new android.speech.tts.TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != android.speech.tts.TextToSpeech.SUCCESS || tts == null) return;
+                int r = tts.setLanguage(java.util.Locale.FRANCE);
+                if (r == android.speech.tts.TextToSpeech.LANG_MISSING_DATA || r == android.speech.tts.TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(java.util.Locale.FRENCH);
+                tts.setSpeechRate(1.0f);
+                ttsReady = true;
+            }
+        });
         String url = getIntent().getStringExtra("url");
         String asset = getIntent().getStringExtra("asset");
         if (url == null || url.length() == 0) { finish(); return; }
@@ -113,6 +133,12 @@ public class WebActivity extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (tts != null) tts.stop();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (web != null) { web.onResume(); web.requestFocus(); }
@@ -120,6 +146,7 @@ public class WebActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (tts != null) { tts.stop(); tts.shutdown(); tts = null; }
         if (web != null) { web.stopLoading(); web.destroy(); web = null; }
         super.onDestroy();
     }

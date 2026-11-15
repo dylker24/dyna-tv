@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dyna Enquêtes</title>
+<style>
+@font-face{font-family:Inter;font-weight:400;src:url(/__dyna/fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:500;src:url(/__dyna/fonts/inter-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:600;src:url(/__dyna/fonts/inter-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-weight:500;src:url(/__dyna/fonts/space-grotesk-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-weight:700;src:url(/__dyna/fonts/space-grotesk-latin-700-normal.woff2) format("woff2")}
+:root{--bg:#0E1512;--card:#151F1A;--card2:#1F2D25;--line:#26352D;--line2:#3D5145;--text:#EFE8DA;--soft:#BDBFAE;--mute:#A9AE9F;--dim:#8F9A8C;--green:#9CCB8F;--gold:#E3CFA4;--red:#E59A86}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;position:fixed;inset:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;-webkit-user-select:none;user-select:none}
+.g{font-family:"Space Grotesk",sans-serif}
+#root{position:fixed;left:0;top:0;width:100vw;height:100vh;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden}
+.scr{position:absolute;inset:0;padding:56px 96px;display:none;flex-direction:column;gap:28px}
+.scr.show{display:flex}
+h1,h2,h3,p{margin:0}
+.kicker{font-size:18px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.mute{color:var(--mute)}
+[data-f]{transition:transform .14s ease,box-shadow .14s ease,background .14s ease}
+.on{box-shadow:0 0 0 4px var(--text)!important;background:var(--card2)!important;transform:scale(1.02)}
+.btn{height:72px;padding:0 34px;border-radius:18px;background:var(--card);border:1px solid var(--line);display:inline-flex;align-items:center;gap:14px;font-size:24px;font-weight:600;white-space:nowrap}
+.btn.main{background:var(--text);color:var(--bg);border-color:transparent}
+.btn.main.on{background:var(--text)!important;color:var(--bg)}
+.row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+svg{flex:none}
+
+/* Menu */
+#menu .top{display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:16px}
+.brand b{font-weight:700;font-size:34px;letter-spacing:.3em}
+.brand i{font-style:normal;font-weight:700;font-size:16px;letter-spacing:.16em;padding:6px 12px;border-radius:999px;background:var(--gold);color:var(--bg)}
+#menu h1{font-size:96px;font-weight:700;letter-spacing:-.02em;line-height:1;margin-top:40px}
+#eps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:20px}
+.ep{height:330px;border-radius:28px;background:var(--card);border:1px solid var(--line);padding:40px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.ep .n{font-size:20px;font-weight:600;color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
+.ep h3{font-size:44px;font-weight:700;line-height:1.05}
+.ep p{font-size:22px;color:var(--soft);line-height:1.4}
+.ep .st{margin-top:auto;font-size:19px;color:var(--mute)}
+.ep.soon{opacity:.5}
+.ep .big{position:absolute;right:-10px;bottom:-60px;font-size:260px;font-weight:700;color:rgba(227,207,164,.07);line-height:1}
+#players{font-size:22px;color:var(--mute)}
+
+/* Appel */
+#call{align-items:center;justify-content:center;gap:40px}
+.ring{width:150px;height:150px;border-radius:999px;background:var(--card2);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 18px rgba(156,203,143,.08),0 0 0 40px rgba(156,203,143,.04)}
+#callWho{font-size:24px;color:var(--green);font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+#callText{font-size:40px;line-height:1.45;max-width:1350px;text-align:center;min-height:240px}
+#callHint{font-size:22px;color:var(--mute)}
+
+/* Tableau d'enquête */
+#hub{flex-direction:row;gap:48px;padding:56px 72px}
+#nav{flex:none;width:360px;display:flex;flex-direction:column;gap:12px}
+#nav .head{margin-bottom:22px}
+#nav .head h2{font-size:34px;font-weight:700;line-height:1.1;margin-top:10px}
+.ni{height:76px;border-radius:18px;padding:0 24px;display:flex;align-items:center;gap:16px;font-size:24px;font-weight:500;color:var(--soft);border:1px solid transparent}
+.ni.cur{background:var(--card);border-color:var(--line);color:var(--text)}
+.ni .badge{margin-left:auto;min-width:36px;height:36px;padding:0 10px;border-radius:999px;background:var(--line);color:var(--text);font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.ni .badge.new{background:var(--gold);color:var(--bg)}
+#score{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:20px;color:var(--mute)}
+#score b{color:var(--text);font-weight:600}
+#pane{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:26px;overflow:hidden}
+#pane h2{font-size:52px;font-weight:700;letter-spacing:-.01em;line-height:1.05}
+#pane .lead{font-size:26px;color:var(--soft);line-height:1.45;max-width:1200px}
+.grid{display:grid;gap:24px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{border-radius:22px;background:var(--card);border:1px solid var(--line);padding:28px;display:flex;flex-direction:column;gap:12px;min-height:150px}
+.card h3{font-size:30px;font-weight:700;line-height:1.15}
+.card p{font-size:20px;color:var(--soft);line-height:1.4}
+.card .meta{font-size:18px;color:var(--mute)}
+.card .chk{color:var(--green);font-size:18px;font-weight:600}
+.card.lock{opacity:.5}
+.pp{display:flex;gap:22px;align-items:center}
+.av{width:84px;height:84px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:var(--bg);flex:none}
+.av.big{width:150px;height:150px;font-size:64px}
+.ic{width:64px;height:64px;border-radius:16px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--gold);flex:none}
+.qlist{display:flex;flex-direction:column;gap:14px}
+.q{min-height:76px;border-radius:18px;background:var(--card);border:1px solid var(--line);padding:16px 26px;display:flex;align-items:center;gap:18px;font-size:24px;font-weight:500;line-height:1.3}
+.q.done{color:var(--mute)}
+.q.lock{color:var(--dim);border-style:dashed}
+.q .tag{margin-left:auto;font-size:17px;color:var(--mute);white-space:nowrap}
+.bubble{border-radius:26px;background:var(--card2);border:1px solid var(--line2);padding:34px 40px;font-size:30px;line-height:1.5}
+.bubble .who{font-size:20px;color:var(--gold);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.empty{font-size:26px;color:var(--mute);line-height:1.5;padding:30px 0}
+
+/* Fenêtres */
+.modal{position:absolute;inset:0;z-index:20;background:rgba(8,12,10,.94);display:none;align-items:center;justify-content:center;padding:80px}
+.modal.show{display:flex}
+.box{width:1440px;max-height:920px;border-radius:32px;background:var(--card);border:1px solid var(--line2);padding:56px 64px;display:flex;flex-direction:column;gap:28px;overflow:hidden}
+.box h2{font-size:52px;font-weight:700;line-height:1.1}
+.box .txt{font-size:30px;line-height:1.5;color:var(--text)}
+.box .sub{font-size:24px;color:var(--soft);line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:16px}
+.opt{min-height:84px;border-radius:20px;background:var(--bg);border:1px solid var(--line);padding:18px 30px;display:flex;align-items:center;gap:22px;font-size:27px;line-height:1.35}
+.opt .k{width:48px;height:48px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;flex:none;color:var(--gold)}
+.opt.good{box-shadow:0 0 0 3px var(--green)}
+.opt.bad{box-shadow:0 0 0 3px var(--red)}
+.opt .who{margin-left:auto;display:flex;gap:10px}
+.pill{height:36px;padding:0 14px;border-radius:999px;font-size:17px;font-weight:600;display:flex;align-items:center;background:var(--line2);color:var(--text)}
+.pill.ok{background:var(--green);color:var(--bg)}
+.pill.ko{background:var(--red);color:var(--bg)}
+.pass{font-size:64px;font-weight:700;text-align:center;line-height:1.15}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.res .card{align-items:flex-start}
+.res .num{font-size:72px;font-weight:700;line-height:1}
+#toast{position:absolute;left:50%;bottom:48px;transform:translateX(-50%);z-index:40;background:var(--gold);color:var(--bg);font-size:24px;font-weight:600;padding:18px 30px;border-radius:18px;opacity:0;transition:opacity .2s ease;pointer-events:none;white-space:nowrap;display:flex;gap:14px;align-items:center}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="root"><div id="stage">
+
+  <section class="scr" id="menu">
+    <div class="top">
+      <div class="brand g"><b>DYNA</b><i>ENQUÊTES</i></div>
+      <div id="players"></div>
+    </div>
+    <h1 class="g">À vous de jouer,<br>enquêteurs.</h1>
+    <div id="eps"></div>
+    <div class="row" id="menuBtns"></div>
+  </section>
+
+  <section class="scr" id="call">
+    <div class="ring"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CCB8F" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></div>
+    <div id="callWho"></div>
+    <div id="callText" class="g"></div>
+    <div id="callHint"></div>
+  </section>
+
+  <section class="scr" id="hub">
+    <nav id="nav"></nav>
+    <main id="pane"></main>
+  </section>
+
+  <div class="modal" id="modal"><div class="box" id="box"></div></div>
+  <div id="toast"></div>
+</div></div>
+
+<script src="/__dyna/enquetes-data.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var D = window.Dyna || null;
+  var EPS = window.DYNA_ENQUETES || [], SOON = window.DYNA_ENQUETES_BIENTOT || [];
+  var PLAYERS = ['Dylan', 'Léna'];
+
+  // ---------- Icônes ----------
+  var IC = {
+    box: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 10h16M8 6.500h2"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    bowl: '<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1 1-2 2-2M13 6c0-1 1-2 2-2"/>',
+    drop: '<path d="M12 3s6 6.500 6 11a6 6 0 0 1-12 0c0-4.500 6-11 6-11z"/>',
+    foot: '<path d="M8 3c2 0 3 2 3 5s-1 6-3 6-3-3-3-6 1-5 3-5zM16 10c2 0 3 2 3 5s-1 6-3 6-3-3-3-6 1-5 3-5z"/>',
+    leaf: '<path d="M5 19C5 10 10 5 20 4c-1 10-6 15-15 15z"/><path d="M5 19l8-8"/>',
+    car: '<path d="M3 16v-4l2-5h14l2 5v4H3z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+    camera: '<rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.500" r="3.500"/><path d="M8 7l2-3h4l2 3"/>',
+    paper: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/>',
+    flask: '<path d="M9 3h6M10 3v6L4 19a1.500 1.500 0 0 0 1.300 2h13.400A1.500 1.500 0 0 0 20 19l-6-10V3"/>',
+    ticket: '<path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 2)"/><path d="M14 6v12" stroke-dasharray="2 2"/>',
+    phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+    map: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
+    people: '<circle cx="9" cy="8" r="3.500"/><path d="M2 20c0-3.500 3-6 7-6s7 2.500 7 6"/><circle cx="17.500" cy="9" r="2.500"/><path d="M17 14c3 0 5 2 5 5"/>',
+    pin: '<path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.500"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+    gavel: '<path d="M14 4l6 6M11 7l6 6M8 17l5-5M3 21h8"/><path d="M12.500 5.500l6 6-3 3-6-6z"/>',
+    sound: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/>',
+    mute: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>',
+    back: '<path d="M15 6l-6 6 6 6"/>',
+    play: '<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
+    reset: '<path d="M4 12a8 8 0 1 0 2.300-5.600"/><path d="M4 4v4.500h4.500"/>',
+    star: '<path d="M12 3l2.700 5.600 6.100.900-4.400 4.300 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.900z"/>'
+  };
+  function ico(n, s, col) { return '<svg width="' + (s || 30) + '" height="' + (s || 30) + '" viewBox="0 0 24 24" fill="none" stroke="' + (col || 'currentColor') + '" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IC[n] || IC.paper) + '</svg>'; }
+
+  // ---------- Voix ----------
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+  var voiceOn = lsGet('dyna.enq.voice', true);
+  function say(text) {
+    if (!voiceOn || !text) return;
+    try {
+      if (D && D.speak) { D.speak(String(text)); return; }
+      if (window.speechSynthesis) {
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(String(text)); u.lang = 'fr-FR'; u.rate = 1.02;
+        speechSynthesis.speak(u);
+      }
+    } catch (e) { }
+  }
+  function hush() { try { if (D && D.stopSpeak) D.stopSpeak(); else if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } }
+
+  // ---------- Navigation télécommande (déplacement vers l'élément le plus proche) ----------
+  var acts = [], focusEl = null;
+  function act(fn) { acts.push(fn); return 'data-f="' + (acts.length - 1) + '"'; }
+  function scope() { var m = $('modal'); return m.className.indexOf('show') >= 0 ? m : document.querySelector('.scr.show'); }
+  function focusables() { var s = scope(); return s ? Array.prototype.slice.call(s.querySelectorAll('[data-f]')) : []; }
+  function setFocus(el) {
+    if (focusEl) focusEl.classList.remove('on');
+    focusEl = el || null;
+    if (!focusEl) return;
+    focusEl.classList.add('on');
+    var p = focusEl.parentElement;
+    while (p && p !== document.body) {
+      if (p.scrollHeight > p.clientHeight + 2 && getComputedStyle(p).overflowY !== 'visible') {
+        var r = focusEl.getBoundingClientRect(), pr = p.getBoundingClientRect(), k = scaleNow();
+        if (r.bottom > pr.bottom - 10) p.scrollTop += (r.bottom - pr.bottom) / k + 30;
+        else if (r.top < pr.top + 10) p.scrollTop -= (pr.top - r.top) / k + 30;
+        break;
+      }
+      p = p.parentElement;
+    }
+    noScroll();
+  }
+  function firstFocus(pref) {
+    var list = focusables();
+    var el = pref ? scope().querySelector(pref) : null;
+    setFocus(el || list[0]);
+  }
+  function move(dx, dy) {
+    var list = focusables();
+    if (!list.length) return;
+    if (!focusEl || list.indexOf(focusEl) < 0) return setFocus(list[0]);
+    var a = focusEl.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+    var best = null, bs = 1e9;
+    list.forEach(function (el) {
+      if (el === focusEl) return;
+      var b = el.getBoundingClientRect(), bx = b.left + b.width / 2, by = b.top + b.height / 2;
+      var main, side;
+      if (dx > 0) { if (b.left < a.right - 4) return; main = b.left - a.right; side = Math.abs(by - ay); }
+      else if (dx < 0) { if (b.right > a.left + 4) return; main = a.left - b.right; side = Math.abs(by - ay); }
+      else if (dy > 0) { if (b.top < a.bottom - 4) return; main = b.top - a.bottom; side = Math.abs(bx - ax); }
+      else { if (b.bottom > a.top + 4) return; main = a.top - b.bottom; side = Math.abs(bx - ax); }
+      var sc = main + side * 2;
+      if (sc < bs) { bs = sc; best = el; }
+    });
+    if (best) setFocus(best);
+  }
+  function ok() { if (focusEl && focusEl.hasAttribute('data-f')) { var f = acts[+focusEl.getAttribute('data-f')]; if (f) f(); } }
+
+  // ---------- État d'une partie ----------
+  var ep = null, st = null;
+  function key() { return 'dyna.enq.' + ep.id; }
+  function fresh() { return { started: true, found: [], spots: [], asked: [], reports: [], seen: [], cps: {}, final: null, score: [0, 0] }; }
+  function save() { lsSet(key(), st); }
+  function has(c) { return st.found.indexOf(c) >= 0; }
+  function hasAll(list) { return (list || []).every(has); }
+  function suspect(id) { for (var i = 0; i < ep.suspects.length; i++) if (ep.suspects[i].id === id) return ep.suspects[i]; return null; }
+  function gain(clue) {
+    if (!clue || has(clue)) return false;
+    st.found.push(clue); save();
+    toast(ico(ep.clues[clue].icon, 28) + 'Nouvel indice : ' + esc(ep.clues[clue].name));
+    return true;
+  }
+
+  var toastT = 0;
+  function toast(html) { var t = $('toast'); t.innerHTML = html; t.className = 'show'; clearTimeout(toastT); toastT = setTimeout(function () { t.className = ''; }, 3400); }
+
+  // ---------- Écrans ----------
+  var screen = 'menu', tab = 'lieux', sub = null, modalBack = null, answer = null;
+  function show(id) {
+    ['menu', 'call', 'hub'].forEach(function (s) { $(s).className = 'scr' + (s === id ? ' show' : ''); });
+    screen = id;
+  }
+
+  // Menu
+  function renderMenu() {
+    acts = []; show('menu'); closeModal(true);
+    $('players').textContent = 'Enquêteurs : ' + PLAYERS.join(' et ');
+    var h = '';
+    EPS.forEach(function (e) {
+      var s = lsGet('dyna.enq.' + e.id, null);
+      var state = !s ? 'Nouvelle enquête' : s.final ? 'Résolue' : 'En cours · ' + s.found.length + ' indice' + (s.found.length > 1 ? 's' : '');
+      h += '<div class="ep" ' + act(function () { openEpisode(e); }) + '><div class="big g">' + e.num + '</div><div class="n">Enquête ' + e.num + ' · ' + esc(e.place) + '</div><h3 class="g">' + esc(e.title) + '</h3><p>' + esc(e.tagline) + '</p><div class="st">' + state + '</div></div>';
+    });
+    SOON.forEach(function (e) {
+      h += '<div class="ep soon"><div class="big g">' + e.num + '</div><div class="n">Enquête ' + e.num + ' · bientôt</div><h3 class="g">' + esc(e.title) + '</h3><p>' + esc(e.tagline) + '</p></div>';
+    });
+    $('eps').innerHTML = h;
+    $('menuBtns').innerHTML = '<div class="btn" ' + act(function () { voiceOn = !voiceOn; lsSet('dyna.enq.voice', voiceOn); hush(); renderMenu(); }) + '>' + ico(voiceOn ? 'sound' : 'mute', 28) + 'Voix : ' + (voiceOn ? 'oui' : 'non') + '</div>';
+    firstFocus('.ep');
+  }
+
+  function openEpisode(e) {
+    ep = e;
+    var s = lsGet(key(), null);
+    if (!s) { st = fresh(); save(); return startCall(); }
+    st = s;
+    modal('<h2 class="g">' + esc(e.title) + '</h2><p class="sub">' + (s.final ? 'Vous avez déjà résolu cette enquête.' : 'Vous avez ' + s.found.length + ' indice' + (s.found.length > 1 ? 's' : '') + ' dans votre dossier.') + '</p>' +
+      '<div class="row"><div class="btn main" ' + act(function () { closeModal(); s.final ? showResults() : openHub(); }) + '>' + ico('play', 26) + (s.final ? 'Voir le résultat' : 'Reprendre') + '</div>' +
+      '<div class="btn" ' + act(function () { st = fresh(); save(); closeModal(); startCall(); }) + '>' + ico('reset', 26) + 'Recommencer à zéro</div></div>', function () { closeModal(); renderMenu(); });
+  }
+
+  // Appel de la gendarmerie
+  var callI = 0;
+  function startCall() { acts = []; show('call'); callI = 0; stepCall(); }
+  function stepCall() {
+    acts = [];
+    var lines = ep.call;
+    if (callI < lines.length) {
+      $('callWho').textContent = 'Appel · ' + lines[callI].who;
+      $('callText').textContent = lines[callI].text;
+      say(lines[callI].text);
+    } else if (callI === lines.length) {
+      $('callWho').textContent = ep.place;
+      $('callText').textContent = ep.intro;
+      say(ep.intro);
+    } else { hush(); return openHub(); }
+    $('callHint').innerHTML = '<span class="btn main" ' + act(function () { callI++; stepCall(); }) + '>' + (callI < lines.length ? 'Suite' : 'Commencer l\'enquête') + '</span>';
+    firstFocus();
+  }
+
+  // Tableau d'enquête
+  function openHub(t) { show('hub'); if (t) tab = t; sub = null; renderHub(); setTimeout(checkEvents, 400); }
+  function newReports() { return st.reports.filter(function (r) { return st.seen.indexOf(r) < 0; }).length; }
+  function renderHub(focusSel) {
+    acts = [];
+    var items = [
+      { id: 'lieux', name: 'Lieux', ic: 'map' },
+      { id: 'temoins', name: 'Témoins', ic: 'people' },
+      { id: 'indices', name: 'Indices', ic: 'pin', badge: st.found.length },
+      { id: 'rapports', name: 'Rapports', ic: 'mail', badge: st.reports.length, isNew: newReports() > 0 },
+      { id: 'accuser', name: 'Accuser', ic: 'gavel' }
+    ];
+    var h = '<div class="head"><div class="kicker">Enquête ' + ep.num + '</div><h2 class="g">' + esc(ep.title) + '</h2></div>';
+    items.forEach(function (it) {
+      h += '<div class="ni' + (tab === it.id ? ' cur' : '') + '" data-tab="' + it.id + '" ' + act(function () { tab = it.id; sub = null; renderHub('[data-tab="' + it.id + '"]'); }) + '>' + ico(it.ic, 28) + it.name +
+        (it.badge ? '<span class="badge' + (it.isNew ? ' new' : '') + '">' + it.badge + '</span>' : '') + '</div>';
+    });
+    var done = ep.checkpoints.filter(function (c) { return st.cps[c.id]; }).length;
+    h += '<div id="score"><div>Flair de ' + PLAYERS[0] + ' : <b>' + st.score[0] + '</b></div><div>Flair de ' + PLAYERS[1] + ' : <b>' + st.score[1] + '</b></div><div>Points d\'enquête : ' + done + ' / ' + ep.checkpoints.length + '</div></div>';
+    $('nav').innerHTML = h;
+    $('pane').innerHTML = pane();
+    $('pane').scrollTop = 0;
+    firstFocus(focusSel || '#pane [data-f]');
+  }
+
+  function pane() {
+    if (tab === 'lieux') {
+      if (sub) return placeView(sub);
+      var h = '<h2 class="g">Les lieux</h2><p class="lead">Fouillez chaque endroit. Les indices trouvés vont directement dans votre dossier.</p><div class="grid g3">';
+      ep.locations.forEach(function (l) {
+        var n = l.spots.filter(function (s) { return st.spots.indexOf(s.id) >= 0; }).length;
+        h += '<div class="card" ' + act(function () { sub = l.id; renderHub('#pane [data-f]'); }) + '><div class="ic">' + ico('pin', 32) + '</div><h3 class="g">' + esc(l.name) + '</h3><div class="meta">' + (n === l.spots.length ? '<span class="chk">Fouillé</span>' : n + ' / ' + l.spots.length + ' endroits fouillés') + '</div></div>';
+      });
+      return h + '</div>';
+    }
+    if (tab === 'temoins') {
+      if (sub) return talkView(sub, answer && answer.p === sub ? answer.a : null);
+      var h2 = '<h2 class="g">Les témoins</h2><p class="lead">Interrogez-les. Certaines questions ne s\'ouvrent qu\'avec le bon indice en main.</p><div class="grid g2">';
+      ep.suspects.forEach(function (p) {
+        var n = p.questions.filter(function (q) { return st.asked.indexOf(q.id) >= 0; }).length;
+        var open = p.questions.filter(function (q) { return st.asked.indexOf(q.id) < 0 && hasAll(q.needs); }).length;
+        h2 += '<div class="card" ' + act(function () { sub = p.id; answer = null; renderHub('#pane [data-f]'); }) + '><div class="pp"><div class="av" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + ', ' + p.age + ' ans</div></div></div>' +
+          '<div class="meta">' + n + ' / ' + p.questions.length + ' questions posées' + (open ? ' · <span style="color:var(--gold)">' + open + ' à poser</span>' : '') + '</div></div>';
+      });
+      return h2 + '</div>';
+    }
+    if (tab === 'indices') {
+      if (!st.found.length) return '<h2 class="g">Vos indices</h2><p class="empty">Aucun indice pour l\'instant. Commencez par fouiller les lieux.</p>';
+      var h3 = '<h2 class="g">Vos indices</h2><div class="grid g3">';
+      st.found.forEach(function (c) {
+        var k = ep.clues[c];
+        h3 += '<div class="card" ' + act(function () { modal('<div class="pp"><div class="ic">' + ico(k.icon, 34) + '</div><h2 class="g">' + esc(k.name) + '</h2></div><p class="txt">' + esc(k.text) + '</p><div class="row"><div class="btn main" ' + act(closeModal) + '>Fermer</div></div>', closeModal); say(k.text); }) + '><div class="pp"><div class="ic">' + ico(k.icon, 32) + '</div><h3 class="g">' + esc(k.name) + '</h3></div></div>';
+      });
+      return h3 + '</div>';
+    }
+    if (tab === 'rapports') {
+      if (!st.reports.length) return '<h2 class="g">Rapports</h2><p class="empty">Aucun rapport. Les gendarmes et la vétérinaire vous écriront quand vous aurez trouvé ce qu\'il faut.</p>';
+      var h4 = '<h2 class="g">Rapports</h2><div class="qlist">';
+      st.reports.forEach(function (rid) {
+        var r = ep.reports.filter(function (x) { return x.id === rid; })[0];
+        h4 += '<div class="q" ' + act(function () { showReport(r); }) + '>' + ico('mail', 30) + '<span><b>' + esc(r.title) + '</b> · <span class="mute">' + esc(r.from) + '</span></span>' + (st.seen.indexOf(r.id) < 0 ? '<span class="tag" style="color:var(--gold)">Nouveau</span>' : '') + '</div>';
+      });
+      return h4 + '</div>';
+    }
+    if (tab === 'accuser') {
+      return '<h2 class="g">L\'accusation</h2><p class="lead">Quand vous êtes sûrs de vous, désignez le coupable, expliquez comment il s\'y est pris et montrez la preuve. Vous n\'avez qu\'une seule chance.</p>' +
+        '<p class="lead mute">Dossier : ' + st.found.length + ' indice' + (st.found.length > 1 ? 's' : '') + ' sur ' + Object.keys(ep.clues).length + '.</p>' +
+        '<div class="row"><div class="btn main" ' + act(startFinal) + '>' + ico('gavel', 28) + 'Accuser quelqu\'un</div></div>';
+    }
+    return '';
+  }
+
+  function placeView(id) {
+    var l = ep.locations.filter(function (x) { return x.id === id; })[0];
+    var h = '<div class="kicker">Lieu</div><h2 class="g">' + esc(l.name) + '</h2><p class="lead">' + esc(l.text) + '</p><div class="qlist">';
+    l.spots.forEach(function (s) {
+      var done = st.spots.indexOf(s.id) >= 0;
+      h += '<div class="q' + (done ? ' done' : '') + '" ' + act(function () { search(l, s); }) + '>' + ico('pin', 28) + '<span>' + esc(s.name) + '</span>' + (done ? '<span class="tag">Fouillé' + (s.clue ? ' · indice trouvé' : '') + '</span>' : '<span class="tag" style="color:var(--gold)">Fouiller</span>') + '</div>';
+    });
+    h += '<div class="q" ' + act(function () { sub = null; renderHub('#pane [data-f]'); }) + '>' + ico('back', 28) + '<span>Retour aux lieux</span></div>';
+    return h + '</div>';
+  }
+  function search(l, s) {
+    if (st.spots.indexOf(s.id) < 0) { st.spots.push(s.id); save(); }
+    var k = s.clue ? ep.clues[s.clue] : null;
+    say(s.text);
+    modal('<div class="kicker">' + esc(l.name) + '</div><h2 class="g">' + esc(s.name) + '</h2><p class="txt">' + esc(s.text) + '</p>' +
+      (k ? '<div class="card" style="flex-direction:row;align-items:center;gap:22px;min-height:0"><div class="ic">' + ico(k.icon, 32) + '</div><div><h3 class="g">Indice : ' + esc(k.name) + '</h3><p>' + esc(k.text) + '</p></div></div>' : '') +
+      '<div class="row"><div class="btn main" ' + act(function () { closeModal(); }) + '>Continuer</div></div>', closeModal);
+    if (s.clue) gain(s.clue);
+  }
+
+  function talkView(id, answer) {
+    var p = suspect(id);
+    var h = '<div class="pp"><div class="av big" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><div><div class="kicker">' + esc(p.role) + '</div><h2 class="g">' + esc(p.name) + '</h2><p class="lead">' + esc(p.intro) + '</p></div></div>';
+    if (answer) h += '<div class="bubble"><div class="who">' + esc(p.name) + '</div>' + esc(answer) + '</div>';
+    h += '<div class="qlist">';
+    p.questions.forEach(function (q) {
+      var asked = st.asked.indexOf(q.id) >= 0, open = hasAll(q.needs);
+      if (!open) { h += '<div class="q lock">' + ico('lock', 26) + '<span>Il vous manque un indice pour poser cette question.</span></div>'; return; }
+      h += '<div class="q' + (asked ? ' done' : '') + '" data-q="' + q.id + '" ' + act(function () { ask(p, q); }) + '>' + ico(asked ? 'paper' : 'people', 26) + '<span>' + esc(q.q) + '</span>' + (asked ? '<span class="tag">Déjà posée</span>' : '') + '</div>';
+    });
+    h += '<div class="q" ' + act(function () { sub = null; renderHub('#pane [data-f]'); }) + '>' + ico('back', 26) + '<span>Retour aux témoins</span></div>';
+    return h + '</div>';
+  }
+  function ask(p, q) {
+    if (st.asked.indexOf(q.id) < 0) { st.asked.push(q.id); save(); }
+    answer = { p: p.id, a: q.a };
+    renderHub('[data-q="' + q.id + '"]');
+    say(q.a);
+    if (q.clue) gain(q.clue);
+    setTimeout(checkEvents, 600);
+  }
+
+  // ---------- Rapports et points d'enquête ----------
+  function checkEvents() {
+    if (screen !== 'hub' || $('modal').className.indexOf('show') >= 0) return;
+    for (var i = 0; i < ep.reports.length; i++) {
+      var r = ep.reports[i];
+      if (st.reports.indexOf(r.id) < 0 && hasAll(r.needs)) { st.reports.push(r.id); save(); return showReport(r, true); }
+    }
+    for (var j = 0; j < ep.checkpoints.length; j++) {
+      var c = ep.checkpoints[j];
+      if (!st.cps[c.id] && hasAll(c.needs)) return startCheckpoint(c);
+    }
+  }
+  function showReport(r, fresh) {
+    if (st.seen.indexOf(r.id) < 0) { st.seen.push(r.id); save(); }
+    var k = ep.clues[r.clue];
+    say(r.from + '. ' + r.text);
+    modal('<div class="kicker">' + (fresh ? 'Nouveau rapport · ' : '') + esc(r.from) + '</div><h2 class="g">' + esc(r.title) + '</h2><p class="txt">' + esc(r.text) + '</p>' +
+      '<div class="row"><div class="btn main" ' + act(function () { closeModal(); }) + '>Ajouter au dossier</div></div>', closeModal);
+    if (r.clue) gain(r.clue);
+  }
+
+  // Point d'enquête : chacun choisit à son tour, sans regarder, puis on compare
+  var cp = null;
+  function startCheckpoint(c) {
+    cp = { c: c, picks: [], who: 0 };
+    say(c.title + '. ' + c.q);
+    cpAsk();
+  }
+  function cpAsk() {
+    var c = cp.c, who = cp.who;
+    var h = '<div class="kicker">' + esc(c.title) + ' · ' + PLAYERS[who] + ' répond</div><h2 class="g">' + esc(c.q) + '</h2>' +
+      '<p class="sub">' + (who === 0 ? 'Chacun répond à son tour, sans regarder la réponse de l\'autre. Discutez d\'abord si vous voulez !' : 'À ' + PLAYERS[1] + ' maintenant. ' + PLAYERS[0] + ', on ne regarde pas !') + '</p><div class="opts">';
+    c.options.forEach(function (o, i) {
+      h += '<div class="opt" ' + act(function () { cp.picks[who] = i; if (who === 0) { cp.who = 1; cpPass(); } else cpReveal(); }) + '><span class="k">' + 'ABCD'.charAt(i) + '</span><span>' + esc(o) + '</span></div>';
+    });
+    modal(h + '</div>', null);
+  }
+  function cpPass() {
+    modal('<p class="pass g">Passe la télécommande<br>à ' + PLAYERS[1] + '</p><div class="row" style="justify-content:center"><div class="btn main" ' + act(cpAsk) + '>C\'est ' + PLAYERS[1] + ' qui a la télécommande</div></div>', null);
+  }
+  function cpReveal() {
+    var c = cp.c, good = [cp.picks[0] === c.answer, cp.picks[1] === c.answer];
+    good.forEach(function (g, i) { if (g) st.score[i]++; });
+    st.cps[c.id] = { picks: cp.picks }; save();
+    var h = '<div class="kicker">' + esc(c.title) + ' · Résultat</div><h2 class="g">' + (good[0] && good[1] ? 'Bravo, vous êtes d\'accord et vous avez raison !' : good[0] || good[1] ? 'Un seul de vous deux avait vu juste.' : 'Raté pour tous les deux…') + '</h2><div class="opts">';
+    c.options.forEach(function (o, i) {
+      var who = '';
+      [0, 1].forEach(function (p) { if (cp.picks[p] === i) who += '<span class="pill ' + (i === c.answer ? 'ok' : 'ko') + '">' + PLAYERS[p] + '</span>'; });
+      h += '<div class="opt' + (i === c.answer ? ' good' : '') + '"><span class="k">' + 'ABCD'.charAt(i) + '</span><span>' + esc(o) + '</span><span class="who">' + who + '</span></div>';
+    });
+    h += '</div><p class="sub">' + esc(c.explain) + '</p><div class="row"><div class="btn main" ' + act(function () { closeModal(); renderHub(); setTimeout(checkEvents, 400); }) + '>Continuer l\'enquête</div></div>';
+    say(c.explain);
+    modal(h, null);
+  }
+
+  // ---------- Accusation ----------
+  var fin = null;
+  function startFinal() {
+    fin = {};
+    var h = '<div class="kicker">Accusation · 1 sur 3</div><h2 class="g">' + esc(ep.final.whoQ) + '</h2><div class="grid g4">';
+    ep.suspects.forEach(function (p) {
+      h += '<div class="card" style="align-items:center;text-align:center" ' + act(function () { fin.who = p.id; finalHow(); }) + '><div class="av big" style="background:' + p.color + '">' + esc(p.name.charAt(0)) + '</div><h3 class="g">' + esc(p.name) + '</h3><div class="meta">' + esc(p.role) + '</div></div>';
+    });
+    modal(h + '</div>', function () { closeModal(); });
+  }
+  function finalHow() {
+    var f = ep.final, h = '<div class="kicker">Accusation · 2 sur 3</div><h2 class="g">' + esc(f.howQ) + '</h2><div class="opts">';
+    f.how.forEach(function (o, i) { h += '<div class="opt" ' + act(function () { fin.how = i; finalProof(); }) + '><span class="k">' + 'ABCD'.charAt(i) + '</span><span>' + esc(o) + '</span></div>'; });
+    modal(h + '</div>', startFinal);
+  }
+  function finalProof() {
+    var f = ep.final, h = '<div class="kicker">Accusation · 3 sur 3</div><h2 class="g">' + esc(f.proofQ) + '</h2><div class="grid g3">';
+    var list = f.proofs.filter(has);
+    list.forEach(function (c) { var k = ep.clues[c]; h += '<div class="card" ' + act(function () { fin.proof = c; finalResult(); }) + '><div class="pp"><div class="ic">' + ico(k.icon, 32) + '</div><h3 class="g">' + esc(k.name) + '</h3></div></div>'; });
+    h += '<div class="card" ' + act(function () { fin.proof = null; finalResult(); }) + '><div class="pp"><div class="ic">' + ico('paper', 32) + '</div><h3 class="g">Pas de preuve, on fonce</h3></div></div>';
+    modal(h + '</div>', finalHow);
+  }
+  function finalResult() {
+    var f = ep.final;
+    var r = { who: fin.who === f.culprit, how: fin.how === f.howAnswer, proof: f.proofAnswers.indexOf(fin.proof) >= 0, picked: fin };
+    st.final = r; save();
+    if (!r.who) {
+      var p = suspect(fin.who);
+      say(f.wrong);
+      return modal('<div class="kicker">Verdict</div><h2 class="g">' + esc(p.name) + ' n\'y est pour rien.</h2><p class="txt">' + esc(f.wrong) + '</p><div class="row"><div class="btn main" ' + act(showResults) + '>Voir le bilan</div></div>', null);
+    }
+    say(f.confession);
+    modal('<div class="kicker">Verdict · c\'était bien ' + esc(suspect(f.culprit).name) + '</div><h2 class="g">Les aveux</h2><p class="txt">' + esc(f.confession) + '</p><div class="row"><div class="btn main" ' + act(finalFate) + '>Décider de son sort</div></div>', null);
+  }
+  function finalFate() {
+    var f = ep.final, h = '<div class="kicker">À vous de décider</div><h2 class="g">' + esc(f.fateQ) + '</h2><div class="opts">';
+    f.fates.forEach(function (o, i) { h += '<div class="opt" ' + act(function () { st.final.fate = i; save(); say(o.text); modal('<div class="kicker">Épilogue</div><h2 class="g">' + esc(o.label) + '</h2><p class="txt">' + esc(o.text) + '</p><div class="row"><div class="btn main" ' + act(showResults) + '>Voir le bilan</div></div>', null); }) + '><span class="k">' + 'AB'.charAt(i) + '</span><span>' + esc(o.label) + '</span></div>'; });
+    say(f.fateQ);
+    modal(h + '</div>', null);
+  }
+  function showResults() {
+    show('hub'); renderHub();
+    var r = st.final, f = ep.final;
+    var pts = (r.who ? 1 : 0) + (r.how ? 1 : 0) + (r.proof ? 1 : 0);
+    var title = pts === 3 ? 'Enquête parfaite !' : pts === 2 ? 'Belle enquête !' : r.who ? 'Coupable trouvé, de justesse.' : 'L\'affaire vous a échappé.';
+    var h = '<div class="kicker">Bilan · ' + esc(ep.title) + '</div><h2 class="g">' + title + '</h2><div class="res">' +
+      '<div class="card"><div class="meta">Accusation</div><div class="num g">' + pts + '/3</div><p>' + (r.who ? 'Bon coupable' : 'Mauvais coupable') + ' · ' + (r.how ? 'bon scénario' : 'scénario faux') + ' · ' + (r.proof ? 'bonne preuve' : 'preuve faible') + '</p></div>' +
+      '<div class="card"><div class="meta">Flair de ' + PLAYERS[0] + '</div><div class="num g">' + st.score[0] + '/' + ep.checkpoints.length + '</div><p>Points d\'enquête réussis</p></div>' +
+      '<div class="card"><div class="meta">Flair de ' + PLAYERS[1] + '</div><div class="num g">' + st.score[1] + '/' + ep.checkpoints.length + '</div><p>Points d\'enquête réussis</p></div></div>' +
+      '<p class="sub">Indices trouvés : ' + st.found.length + ' sur ' + Object.keys(ep.clues).length + '. ' + (st.score[0] === st.score[1] ? 'Égalité au flair !' : 'Meilleur flair : ' + PLAYERS[st.score[0] > st.score[1] ? 0 : 1] + '.') + '</p>' +
+      '<div class="row"><div class="btn main" ' + act(function () { closeModal(); renderMenu(); }) + '>Retour aux enquêtes</div><div class="btn" ' + act(function () { st = fresh(); save(); closeModal(); startCall(); }) + '>' + ico('reset', 26) + 'Rejouer</div></div>';
+    say(title);
+    modal(h, function () { closeModal(); renderMenu(); });
+  }
+
+  // ---------- Fenêtre ----------
+  function modal(html, onBack) {
+    var keep = acts.length;
+    $('box').innerHTML = html;
+    $('modal').className = 'modal show';
+    modalBack = onBack;
+    focusEl = null;
+    firstFocus('#box .btn.main, #box [data-f]');
+  }
+  function closeModal(silent) {
+    var was = $('modal').className.indexOf('show') >= 0;
+    $('modal').className = 'modal';
+    $('box').innerHTML = '';
+    modalBack = null;
+    if (silent === true || !was) return;
+    hush();
+    if (screen === 'hub') { renderHub(sub ? '#pane [data-f]' : null); setTimeout(checkEvents, 400); }
+    else firstFocus();
+  }
+
+  // ---------- Retour ----------
+  window.dynaPress = function (text) {
+    var el = focusables().filter(function (e) { return e.textContent.indexOf(text) >= 0; })[0];
+    if (!el) return false; setFocus(el); ok(); return true;
+  };
+  window.dynaBack = function () {
+    if ($('modal').className.indexOf('show') >= 0) {
+      if (modalBack) { modalBack(); return true; }
+      return true;
+    }
+    if (screen === 'hub') {
+      hush();
+      if (sub) { sub = null; renderHub(); return true; }
+      renderMenu(); return true;
+    }
+    if (screen === 'call') { hush(); renderMenu(); return true; }
+    hush();
+    return false;
+  };
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key, c = e.keyCode;
+    if (k === 'ArrowLeft' || c === 37) move(-1, 0);
+    else if (k === 'ArrowRight' || c === 39) move(1, 0);
+    else if (k === 'ArrowUp' || c === 38) move(0, -1);
+    else if (k === 'ArrowDown' || c === 40) move(0, 1);
+    else if (k === 'Enter' || c === 13 || c === 23) ok();
+    else if (k === 'Escape') { if (!window.dynaBack() && window.history.length > 1) window.history.back(); }
+    else return;
+    e.preventDefault();
+  });
+
+  // ---------- Taille de l'écran ----------
+  var curScale = 1;
+  function scaleNow() { return curScale; }
+  function noScroll() { window.scrollTo(0, 0); $('root').scrollTop = $('root').scrollLeft = 0; }
+  function fit() {
+    var w = (D && D.screenW && D.screenW()) || document.documentElement.clientWidth || window.innerWidth;
+    var h = (D && D.screenH && D.screenH()) || document.documentElement.clientHeight || window.innerHeight;
+    var s = Math.min(w / 1920, h / 1080); curScale = s;
+    $('stage').style.transform = 'scale(' + s + ')';
+    $('stage').style.left = Math.max(0, (w - 1920 * s) / 2) + 'px';
+    $('stage').style.top = Math.max(0, (h - 1080 * s) / 2) + 'px';
+    noScroll();
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('scroll', noScroll);
+  fit(); setTimeout(fit, 300); setTimeout(fit, 1200);
+  renderMenu();
+})();
+</script>
+</body>
+</html>
